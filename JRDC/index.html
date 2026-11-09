@@ -1,0 +1,3191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://pepyecmpisbmlzwobbqy.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_HSQ5ruWmHLoMozzj3GJ7Gw_c6fPZhAN';
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+      throw new Error('Supabase JS v2 failed to load. Check the CDN script and network connection.');
+    }
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage
+      }
+    });
+    if (typeof supabaseClient.from !== 'function') {
+      throw new Error('Supabase client initialization failed: .from() is unavailable.');
+    }
+    window.supabaseClient = supabaseClient;
+  </script>
+  <title>JRDC GOLD INTERNATIONAL - Portal</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- QRCode Library for Generating QR Codes -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            emerald: {
+              950: '#022c22',
+              900: '#064e3b',
+              800: '#065f46',
+              700: '#047857',
+              600: '#059669',
+              500: '#10b981',
+              100: '#d1fae5',
+              50: '#ecfdf5',
+            },
+            gold: {
+              300: '#fde047',
+              400: '#facc15',
+              500: '#eab308',
+              600: '#d97706',
+              700: '#b45309',
+            },
+            rosegold: {
+              300: '#fca5a5',
+              400: '#f87171',
+              500: '#fb7185',
+              600: '#e11d48',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #022c22;
+      color: #ecfdf5;
+      font-family: 'Inter', sans-serif;
+    }
+    .gold-gradient-bg {
+      background: linear-gradient(135deg, #facc15 0%, #d97706 100%);
+    }
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #fde047 0%, #f59e0b 50%, #d97706 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .emerald-card {
+      background-color: #064e3b;
+      border: 1px solid #d97706;
+      box-shadow: 0 4px 20px rgba(217, 119, 6, 0.15);
+    }
+    @media (max-width: 1023px) {
+      #nav-tabs-container .nav-tab.border-b-2 {
+        border-bottom-width: 0;
+        border-top-width: 2px;
+      }
+    }
+    html {
+      scrollbar-width: none;
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ==================== UNIFIED LOGIN, REGISTER & FORGOT VIEW ==================== -->
+  <div id="auth-loading-view" class="min-h-screen flex items-center justify-center p-4">
+    <div class="emerald-card rounded-xl p-6 text-center space-y-3">
+      <i id="auth-restore-icon" class="fa-solid fa-spinner fa-spin text-gold-400 text-2xl"></i>
+      <p id="auth-restore-message" class="text-sm font-bold text-emerald-100">Restoring your session...</p>
+      <button id="auth-restore-retry" onclick="retryAuthRestore()" class="hidden bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold px-4 py-2 rounded-lg text-xs transition">
+        Retry
+      </button>
+    </div>
+  </div>
+
+  <div id="auth-view" class="hidden min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full emerald-card rounded-2xl p-8 border-2 border-gold-500 shadow-2xl relative space-y-6">
+      
+      <!-- Brand Logo & Header -->
+      <div class="text-center space-y-3">
+        <div class="w-40 h-32 mx-auto overflow-hidden flex items-center justify-center">
+          <img src="869005005_960259000063217_7598043318442478186_n.jpg" alt="JRDC Gold International Logo" class="w-full h-full object-contain">
+        </div>
+        <div>
+          <h1 class="text-2xl font-black tracking-wider gold-gradient-text uppercase">
+            JRDC GOLD INTERNATIONAL
+          </h1>
+          <p class="text-xs text-emerald-100 font-medium tracking-wide mt-1">
+            Login
+          </p>
+        </div>
+      </div>
+
+      <!-- 1. LOGIN FORM -->
+      <div id="form-login" class="space-y-4">
+        <form onsubmit="handleUnifiedLogin(event)" class="space-y-4" autocomplete="off">
+          <div>
+            <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Email Address</label>
+            <input type="email" id="login-user" autocomplete="off" class="w-full bg-emerald-950 border border-gold-500 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-gold-300" required>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Password</label>
+            <input type="password" id="login-pass" autocomplete="new-password" class="w-full bg-emerald-950 border border-gold-500 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-gold-300" required>
+          </div>
+          <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black py-3 rounded-lg text-sm transition shadow-lg uppercase tracking-wider">
+            Sign In
+          </button>
+        </form>
+        <div class="text-center pt-2 flex justify-between text-xs">
+          <p class="text-emerald-200">Don't have an account? <button onclick="switchAuthMode('register')" class="text-gold-300 font-bold hover:underline">Register</button></p>
+          <button onclick="switchAuthMode('forgot')" class="text-gold-300 hover:underline">Forgot Password?</button>
+        </div>
+      </div>
+
+      <!-- 2. REGISTER FORM -->
+      <div id="form-register" class="space-y-4 hidden">
+        <form onsubmit="handleRegister(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Entry / Referral Code</label>
+            <input type="text" id="reg-code" class="w-full bg-emerald-900 border border-gold-500/60 rounded-lg p-2 text-gold-300 font-mono text-xs">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Full Name</label>
+            <input type="text" id="reg-name" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white text-xs" required>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Email Address</label>
+            <input type="email" id="reg-email" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white text-xs" required>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Password</label>
+            <input type="password" id="reg-pass" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white text-xs" required>
+          </div>
+          <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black py-3 rounded-lg text-xs transition shadow-lg uppercase tracking-wider mt-2">
+            Register
+          </button>
+          <p class="text-center text-[11px] text-emerald-200">Registration includes a ₱500 bonus.</p>
+        </form>
+        <div class="text-center pt-2">
+          <p class="text-xs text-emerald-200">Already have an account? <button onclick="switchAuthMode('login')" class="text-gold-300 font-bold hover:underline">Sign In</button></p>
+        </div>
+      </div>
+
+      <!-- 3. FORGOT PASSWORD FORM -->
+      <div id="form-forgot" class="space-y-4 hidden">
+        <form onsubmit="handleForgot(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Email Address</label>
+            <input type="email" id="forgot-input" autocomplete="email" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-xs" required>
+          </div>
+          <p id="forgot-notice" class="text-[11px] text-emerald-200 italic">If an account exists for this email, we’ll send a password reset link to its inbox.</p>
+          <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black py-3 rounded-lg text-xs transition shadow-lg uppercase tracking-wider">
+            Reset Password Request
+          </button>
+        </form>
+        <div class="text-center pt-2">
+          <button onclick="switchAuthMode('login')" class="text-xs text-gold-300 font-bold hover:underline">Back to Sign In</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== MAIN APP CONTAINER ==================== -->
+  <div id="main-app-container" class="hidden min-h-screen flex flex-col pb-16 lg:pb-0">
+
+    <!-- TOP HEADER -->
+    <header class="bg-emerald-900 border-b-2 border-gold-600 sticky top-0 z-40 shadow-xl">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 min-h-16 sm:min-h-20 flex flex-wrap lg:flex-nowrap items-center gap-x-3 gap-y-1.5 sm:gap-y-2 py-1.5">
+        <div class="flex items-center space-x-2 sm:space-x-3 min-w-0 shrink-0">
+          <div class="w-12 h-12 sm:w-16 sm:h-16 shrink-0 overflow-hidden flex items-center justify-center">
+            <img src="869005005_960259000063217_7598043318442478186_n.jpg" alt="JRDC Gold International Logo" class="w-full h-full object-contain">
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-sm sm:text-xl font-black tracking-wide sm:tracking-wider gold-gradient-text uppercase leading-tight">
+              JRDC GOLD INTERNATIONAL
+            </h1>
+          </div>
+        </div>
+
+        <nav class="fixed bottom-0 inset-x-0 z-50 order-3 w-full bg-emerald-900 border-t border-gold-600/50 shadow-[0_-4px_16px_rgba(0,0,0,0.3)] lg:static lg:order-none lg:w-auto lg:flex-1 lg:min-w-0 lg:bg-transparent lg:border-0 lg:shadow-none" aria-label="Main navigation">
+          <div class="flex w-full lg:justify-center lg:space-x-2 overflow-x-auto py-1" id="nav-tabs-container">
+            <button onclick="switchTab('overview')" id="tab-overview" aria-label="Dashboard Overview" title="Dashboard Overview" class="nav-tab text-gold-300 border-b-2 border-gold-400 font-bold px-1 lg:px-2 py-2 lg:py-1.5 text-[9px] lg:text-xs rounded-t-md whitespace-nowrap transition flex flex-1 lg:flex-none flex-col lg:flex-row items-center justify-center gap-0.5 lg:gap-1.5 bg-emerald-800/60">
+              <i class="fa-solid fa-chart-line text-sm lg:text-xs"></i><span>Overview</span>
+            </button>
+            <button onclick="switchTab('shop')" id="tab-shop" aria-label="Online Shop" title="Online Shop" class="nav-tab text-emerald-100 hover:text-gold-300 font-bold px-1 lg:px-2 py-2 lg:py-1.5 text-[9px] lg:text-xs rounded-t-md whitespace-nowrap transition flex flex-1 lg:flex-none flex-col lg:flex-row items-center justify-center gap-0.5 lg:gap-1.5">
+              <i class="fa-solid fa-store text-sm lg:text-xs"></i><span>Shop</span>
+            </button>
+            <button onclick="switchTab('cashin')" id="tab-cashin" aria-label="Cash-In & Receipt" title="Cash-In & Receipt" class="nav-tab text-emerald-100 hover:text-gold-300 font-bold px-1 lg:px-2 py-2 lg:py-1.5 text-[9px] lg:text-xs rounded-t-md whitespace-nowrap transition flex flex-1 lg:flex-none flex-col lg:flex-row items-center justify-center gap-0.5 lg:gap-1.5">
+              <i class="fa-solid fa-wallet text-sm lg:text-xs"></i><span>Cash-In</span>
+            </button>
+            <button onclick="switchTab('cashout')" id="tab-cashout" aria-label="Weekly Commission Payout" title="Weekly Commission Payout" class="nav-tab text-emerald-100 hover:text-gold-300 font-bold px-1 lg:px-2 py-2 lg:py-1.5 text-[9px] lg:text-xs rounded-t-md whitespace-nowrap transition flex flex-1 lg:flex-none flex-col lg:flex-row items-center justify-center gap-0.5 lg:gap-1.5">
+              <i class="fa-solid fa-money-bill-transfer text-sm lg:text-xs"></i><span>Payout</span>
+            </button>
+            <button onclick="switchTab('referral')" id="tab-referral" aria-label="My Referral Link & QR" title="My Referral Link & QR" class="nav-tab text-emerald-100 hover:text-gold-300 font-bold px-1 lg:px-2 py-2 lg:py-1.5 text-[9px] lg:text-xs rounded-t-md whitespace-nowrap transition flex flex-1 lg:flex-none flex-col lg:flex-row items-center justify-center gap-0.5 lg:gap-1.5">
+              <i class="fa-solid fa-qrcode text-sm lg:text-xs"></i><span>Referral</span>
+            </button>
+            <button onclick="switchTab('spin')" id="tab-spin" aria-label="Spin & Win Game" title="Spin & Win Game" class="nav-tab text-emerald-100 hover:text-gold-300 font-bold px-1 lg:px-2 py-2 lg:py-1.5 text-[9px] lg:text-xs rounded-t-md whitespace-nowrap transition flex flex-1 lg:flex-none flex-col lg:flex-row items-center justify-center gap-0.5 lg:gap-1.5">
+              <i class="fa-solid fa-dharmachakra text-sm lg:text-xs"></i><span>Spin</span>
+            </button>
+            <button onclick="switchTab('about')" id="tab-about" aria-label="About Us" title="About Us" class="nav-tab text-emerald-100 hover:text-gold-300 font-bold px-1 lg:px-2 py-2 lg:py-1.5 text-[9px] lg:text-xs rounded-t-md whitespace-nowrap transition flex flex-1 lg:flex-none flex-col lg:flex-row items-center justify-center gap-0.5 lg:gap-1.5">
+              <i class="fa-solid fa-circle-info text-sm lg:text-xs"></i><span>About</span>
+            </button>
+            <button onclick="switchTab('admin')" id="tab-admin" aria-label="Admin Panel" title="Admin Panel" class="nav-tab hidden text-emerald-100 hover:text-gold-300 font-bold px-1 lg:px-2 py-2 lg:py-1.5 text-[9px] lg:text-xs rounded-t-md whitespace-nowrap transition flex-col lg:flex-row items-center justify-center gap-0.5 lg:gap-1.5 bg-emerald-950/80 border border-gold-500/60 text-gold-300">
+              <i class="fa-solid fa-user-shield text-sm lg:text-xs text-gold-400"></i><span>Admin</span>
+            </button>
+          </div>
+        </nav>
+
+        <div class="flex items-center shrink-0 ml-auto lg:ml-0">
+          <button onclick="handleLogout()" class="bg-emerald-950 hover:bg-emerald-800 text-gold-300 border border-gold-500 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs font-bold transition flex items-center gap-1.5 shadow">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- USER PROFILE BAR -->
+    <section id="user-profile-bar" class="bg-emerald-950 border-b border-gold-600/40 py-2 sm:py-4 px-3 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 sm:gap-4">
+        
+        <div class="flex items-center space-x-3 sm:space-x-4 w-full md:w-auto min-w-0">
+          <div class="relative group">
+            <img id="user-avatar" src="https://placehold.co/100x100/047857/facc15?text=User" alt="Profile" class="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-gold-400 object-cover shadow-md">
+            <label for="avatar-input" class="absolute bottom-0 right-0 bg-gold-500 hover:bg-gold-400 text-emerald-950 p-1.5 rounded-full cursor-pointer shadow-lg transition" title="Change Profile Picture">
+              <i class="fa-solid fa-camera text-xs"></i>
+            </label>
+            <input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="changeProfilePic(event)">
+          </div>
+
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 id="user-name-display" class="text-base sm:text-lg font-bold text-emerald-50"></h2>
+              <span id="rank-badge" class="bg-gradient-to-r from-gold-600 to-gold-400 text-emerald-950 text-xs px-2.5 py-0.5 rounded-full font-black uppercase shadow">
+                <i class="fa-solid fa-crown mr-1"></i> <span id="rank-name">New Member</span>
+              </span>
+            </div>
+            <p class="text-xs text-gold-300 font-mono mt-0.5">Account Number: <span id="user-id-display"></span></p>
+            <p class="text-[11px] text-emerald-200 mt-0.5">Direct Members: <span id="direct-count" class="font-bold text-white">0</span></p>
+            <p class="text-[11px] text-emerald-200 mt-0.5">Email: <span id="user-email-display" class="text-white font-mono"></span> <button onclick="openChangeEmailModal()" class="text-gold-300 underline ml-1 font-bold">[Edit]</button></p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-emerald-800 pt-2 sm:pt-3 md:pt-0">
+          <div class="bg-emerald-900 border border-gold-500/50 rounded-lg px-2.5 sm:px-4 py-1.5 sm:py-2 text-center">
+            <span class="text-[10px] sm:text-xs text-emerald-100 block font-medium">Available Balance</span>
+            <span class="text-sm sm:text-lg font-extrabold text-gold-400" id="header-balance">₱0.00</span>
+          </div>
+          <div class="bg-emerald-900 border border-gold-500/50 rounded-lg px-2.5 sm:px-4 py-1.5 sm:py-2 text-center">
+            <span class="text-[10px] sm:text-xs text-emerald-100 block font-medium">Royalty Points</span>
+            <span class="text-sm sm:text-lg font-extrabold text-gold-300" id="header-royalty">0 PTS</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MAIN BODY CONTENT AREA -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+
+      <!-- ==================== TAB 1: OVERVIEW ==================== -->
+      <div id="view-overview" class="tab-content space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="emerald-card rounded-xl p-5 relative overflow-hidden">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs uppercase font-bold text-gold-400 tracking-wider">Available Balance</p>
+                <h3 class="text-2xl sm:text-3xl font-black text-white mt-1" id="dash-balance">₱0.00</h3>
+              </div>
+              <div class="bg-gold-500/20 text-gold-400 p-3 rounded-lg border border-gold-500/40">
+                <i class="fa-solid fa-wallet text-2xl"></i>
+              </div>
+            </div>
+            <p class="text-xs text-emerald-100 mt-4 flex items-center gap-1">
+              <i class="fa-solid fa-circle-check text-gold-400"></i> Ready for 100% Shop Value or Cash-Out
+            </p>
+          </div>
+
+          <div class="emerald-card rounded-xl p-5 relative overflow-hidden">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs uppercase font-bold text-gold-400 tracking-wider">Total Earnings</p>
+                <h3 class="text-2xl sm:text-3xl font-black text-white mt-1" id="dash-total-earnings">₱0.00</h3>
+              </div>
+              <div class="bg-gold-500/20 text-gold-400 p-3 rounded-lg border border-gold-500/40">
+                <i class="fa-solid fa-coins text-2xl"></i>
+              </div>
+            </div>
+            <p class="text-xs text-emerald-100 mt-4 flex items-center gap-1">
+              <i class="fa-solid fa-arrow-trend-up text-gold-400"></i> Earnings from sales and eligible commissions
+            </p>
+          </div>
+
+          <div class="emerald-card rounded-xl p-5 relative overflow-hidden">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs uppercase font-bold text-gold-400 tracking-wider">Commissions & Incentives</p>
+                <h3 class="text-2xl sm:text-3xl font-black text-white mt-1" id="dash-commission">₱0.00</h3>
+              </div>
+              <div class="bg-gold-500/20 text-gold-400 p-3 rounded-lg border border-gold-500/40">
+                <i class="fa-solid fa-hand-holding-dollar text-2xl"></i>
+              </div>
+            </div>
+            <p class="text-xs text-emerald-100 mt-4 flex items-center gap-1">
+              <i class="fa-solid fa-shield text-gold-400"></i> Verified Sales Volume
+            </p>
+          </div>
+        </div>
+
+        <div class="emerald-card rounded-xl p-6 border-2 border-gold-500">
+          <h3 class="text-lg font-bold text-gold-300 flex items-center gap-2 mb-4 border-b border-gold-500/30 pb-2">
+            <i class="fa-solid fa-gem text-gold-400"></i> Points & Royalty Performance Summary
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-emerald-950 p-4 rounded-lg border border-gold-500/50">
+              <span class="text-xs text-emerald-100 block font-semibold">Royalty Bonus Points</span>
+              <span class="text-2xl font-black text-gold-400" id="pts-royalty">0 PTS</span>
+              <p class="text-xs text-emerald-100 mt-1">₱100k Sales = 100 Royalty Points</p>
+            </div>
+            <div class="bg-emerald-950 p-4 rounded-lg border border-gold-500/50">
+              <span class="text-xs text-emerald-100 block font-semibold">Elite Gold Points (EGP)</span>
+              <span class="text-2xl font-black text-gold-300" id="pts-egp">EGP 0.000</span>
+              <p class="text-xs text-emerald-100 mt-1">₱10k Sales = 0.888 EGP</p>
+            </div>
+            <div class="bg-emerald-950 p-4 rounded-lg border border-gold-500/50">
+              <span class="text-xs text-emerald-100 block font-semibold">Elite Diamond Points (EDP)</span>
+              <span class="text-2xl font-black text-gold-300" id="pts-edp">EDP 0.000</span>
+              <p class="text-xs text-emerald-100 mt-1">₱10k Sales = 0.927 EDP</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Incentives & Physical Rewards Section -->
+        <div class="emerald-card rounded-xl p-6 border-2 border-gold-500 space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gold-500/30 pb-2 gap-2">
+            <h3 class="text-lg font-bold text-gold-300 flex items-center gap-2">
+              <i class="fa-solid fa-trophy text-gold-400"></i> Physical Rewards & Incentive Milestones
+            </h3>
+            <span class="bg-emerald-950 text-gold-300 text-xs px-3 py-1 rounded-full border border-gold-500 font-bold">
+              Accumulated GCs: <span id="user-gc-count" class="text-white font-extrabold">0 GCs</span>
+            </span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-emerald-950 rounded-lg p-4 border border-gold-500/40 relative flex flex-col justify-between">
+              <div>
+                <div class="w-10 h-10 rounded-full bg-gold-500/20 text-gold-400 flex items-center justify-center font-bold text-lg mb-2">
+                  <i class="fa-solid fa-bowl-rice"></i>
+                </div>
+                <h4 class="font-bold text-white text-base">Rice Incentive</h4>
+                <p class="text-xs text-emerald-100 mt-1">1 GC = 1 Sack of Rice (25kg)</p>
+                <p class="text-xs text-gold-300 mt-2 font-mono">10 Sales/Repeat Orders = 1 GC</p>
+              </div>
+              <button onclick="redeemReward('Rice Incentive', 1)" class="mt-4 w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold py-1.5 px-3 rounded text-xs transition">
+                Redeem (1 GC)
+              </button>
+            </div>
+
+            <div class="bg-emerald-950 rounded-lg p-4 border border-gold-500/40 relative flex flex-col justify-between">
+              <div>
+                <div class="w-10 h-10 rounded-full bg-gold-500/20 text-gold-400 flex items-center justify-center font-bold text-lg mb-2">
+                  <i class="fa-solid fa-plane"></i>
+                </div>
+                <h4 class="font-bold text-white text-base">Travel Incentive</h4>
+                <p class="text-xs text-emerald-100 mt-1">All-expenses paid trip</p>
+                <p class="text-xs text-gold-300 mt-2 font-mono">Target: 500 GCs</p>
+              </div>
+              <button class="mt-4 w-full bg-emerald-800 text-emerald-100 font-bold py-1.5 px-3 rounded text-xs cursor-not-allowed opacity-75">
+                500 GCs Needed
+              </button>
+            </div>
+
+            <div class="bg-emerald-950 rounded-lg p-4 border border-gold-500/40 relative flex flex-col justify-between">
+              <div>
+                <div class="w-10 h-10 rounded-full bg-gold-500/20 text-gold-400 flex items-center justify-center font-bold text-lg mb-2">
+                  <i class="fa-solid fa-car"></i>
+                </div>
+                <h4 class="font-bold text-white text-base">Car Incentive</h4>
+                <p class="text-xs text-emerald-100 mt-1">Mitsubishi Mirage G4 Brand-New</p>
+                <p class="text-xs text-gold-300 mt-2 font-mono">Target: 1,000 GCs</p>
+              </div>
+              <button class="mt-4 w-full bg-emerald-800 text-emerald-100 font-bold py-1.5 px-3 rounded text-xs cursor-not-allowed opacity-75">
+                1,000 GCs Needed
+              </button>
+            </div>
+
+            <div class="bg-emerald-950 rounded-lg p-4 border border-gold-500/40 relative flex flex-col justify-between">
+              <div>
+                <div class="w-10 h-10 rounded-full bg-gold-500/20 text-gold-400 flex items-center justify-center font-bold text-lg mb-2">
+                  <i class="fa-solid fa-building"></i>
+                </div>
+                <h4 class="font-bold text-white text-base">Condo Incentive</h4>
+                <p class="text-xs text-emerald-100 mt-1">Fully Furnished Condo</p>
+                <p class="text-xs text-gold-300 mt-2 font-mono">Target: 5,000 GCs</p>
+              </div>
+              <button class="mt-4 w-full bg-emerald-800 text-emerald-100 font-bold py-1.5 px-3 rounded text-xs cursor-not-allowed opacity-75">
+                5,000 GCs Needed
+              </button>
+            </div>
+          </div>
+
+          <!-- REDEMPTION HISTORY TABLE FOR USERS -->
+          <div class="pt-4 border-t border-gold-500/30">
+            <h4 class="text-sm font-bold text-gold-300 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-clock-rotate-left text-gold-400"></i> My Reward Redemption History
+            </h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-emerald-100">
+                <thead class="bg-emerald-950 text-gold-300 border-b border-gold-500/40 uppercase font-mono">
+                  <tr>
+                    <th class="p-2.5">Reward Title</th>
+                    <th class="p-2.5">GCs Used</th>
+                    <th class="p-2.5">Date Redeemed</th>
+                    <th class="p-2.5">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="user-redemption-history" class="divide-y divide-emerald-800"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 2: ONLINE SHOP ==================== -->
+      <div id="view-shop" class="tab-content hidden space-y-6">
+        <div class="emerald-card rounded-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 class="text-2xl font-black text-white flex items-center gap-2">
+              <i class="fa-solid fa-store text-gold-400"></i> Official JRDC Gold Store
+            </h2>
+            <p class="text-xs text-emerald-100 mt-1">Orders require admin approval; wallet funds are reserved while pending. Approved orders earn EGP, EDP, Royalty Points, and GCs.</p>
+          </div>
+          <button onclick="openCartModal()" class="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-lg transition">
+            <i class="fa-solid fa-cart-shopping"></i> Shopping Cart 
+            <span id="cart-count" class="bg-emerald-950 text-gold-300 text-xs w-6 h-6 rounded-full flex items-center justify-center font-extrabold">0</span>
+          </button>
+        </div>
+
+        <div id="shop-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <div class="emerald-card rounded-xl p-6">
+          <h3 class="text-lg font-bold text-gold-300 mb-3 border-b border-gold-500/30 pb-2">My Store Orders</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-emerald-100">
+              <thead class="bg-emerald-950 text-gold-300 border-b border-gold-500/40 uppercase font-mono">
+                <tr><th class="p-2.5">Order</th><th class="p-2.5">Items</th><th class="p-2.5">Total</th><th class="p-2.5">Date</th><th class="p-2.5">Status</th></tr>
+              </thead>
+              <tbody id="user-store-orders" class="divide-y divide-emerald-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 3: CASH-IN ==================== -->
+      <div id="view-cashin" class="tab-content hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <div class="emerald-card rounded-xl p-6 space-y-6">
+            <div>
+              <h3 class="text-xl font-bold text-gold-300 mb-4 border-b border-gold-500/30 pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-qrcode text-gold-400"></i> Company Official Payment Options
+              </h3>
+
+              <div class="space-y-4">
+                <div class="bg-emerald-950 p-4 rounded-lg border border-gold-500/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div>
+                    <span class="bg-emerald-800 text-gold-300 text-xs px-2.5 py-1 rounded font-bold uppercase">GCash Account</span>
+                    <h4 class="text-lg font-bold text-white mt-1">JRDC GOLD (JO*Y D.)</h4>
+                    <p class="text-sm font-mono text-gold-400">Mobile: +63 933 827...</p>
+                    <p class="text-xs text-emerald-100 mt-1">The full amount is credited after admin approval.</p>
+                  </div>
+                  <div class="cursor-pointer group" onclick="openQrModal('864135049_2665875840491827_7335505033821768891_n.jpg', 'GCash QR Code')">
+                    <img src="864135049_2665875840491827_7335505033821768891_n.jpg" alt="GCash QR" class="w-24 h-28 object-contain rounded border-2 border-gold-400 group-hover:scale-105 transition shadow">
+                    <span class="text-[10px] text-gold-300 block text-center mt-1">Click to Zoom</span>
+                  </div>
+                </div>
+
+                <div class="bg-emerald-950 p-4 rounded-lg border border-gold-500/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div>
+                    <span class="bg-emerald-800 text-gold-300 text-xs px-2.5 py-1 rounded font-bold uppercase">BDO Unibank</span>
+                    <h4 class="text-lg font-bold text-white mt-1">JRDCGOLD</h4>
+                    <p class="text-sm font-mono text-gold-400">Acct No.: ........2238</p>
+                    <p class="text-xs text-emerald-100 mt-1">The full amount you send will be credited after admin approval.</p>
+                  </div>
+                  <div class="cursor-pointer group" onclick="openQrModal('864886925_1384970680095178_5007685508056153736_n.jpg', 'BDO QR Code')">
+                    <img src="864886925_1384970680095178_5007685508056153736_n.jpg" alt="BDO QR" class="w-24 h-28 object-contain rounded border-2 border-gold-400 group-hover:scale-105 transition shadow">
+                    <span class="text-[10px] text-gold-300 block text-center mt-1">Click to Zoom</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6 bg-emerald-900/60 p-4 rounded-lg border border-gold-500/30 text-xs text-emerald-100 space-y-1">
+                <p class="font-bold text-gold-300"><i class="fa-solid fa-circle-info"></i> Instructions:</p>
+                <p>1. Scan QR or send exact amount to GCash or BDO details above.</p>
+                <p>2. Take a screenshot or clear photo of the deposit slip/receipt.</p>
+                <p>3. The full amount sent is credited after admin approval. No P2P cash-in fee is deducted.</p>
+              </div>
+            </div>
+
+            <!-- USER CASH-IN HISTORY & STATUS -->
+            <div class="pt-4 border-t border-gold-500/30">
+              <h4 class="text-sm font-bold text-gold-300 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-history text-gold-400"></i> My Cash-In Status History
+              </h4>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-emerald-100">
+                  <thead class="bg-emerald-950 text-gold-300 border-b border-gold-500/40 uppercase font-mono">
+                    <tr>
+                      <th class="p-2">ID & Method</th>
+                      <th class="p-2">Amount / Credited</th>
+                      <th class="p-2">Ref No.</th>
+                      <th class="p-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="user-cashin-history" class="divide-y divide-emerald-800"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="emerald-card rounded-xl p-6">
+            <h3 class="text-xl font-bold text-gold-300 mb-4 border-b border-gold-500/30 pb-2 flex items-center gap-2">
+              <i class="fa-solid fa-file-invoice-dollar text-gold-400"></i> Upload Cash-In Receipt
+            </h3>
+
+            <form onsubmit="submitCashIn(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Payment Method</label>
+                <select id="cashin-method" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300" required>
+                  <option value="GCash">GCash (JO*Y D. - 0933827...)</option>
+                  <option value="BDO">BDO Unibank (JRDCGOLD - 2238)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Amount Sent (₱)</label>
+                <input type="number" id="cashin-amount" min="100" step="0.01" oninput="updateCashInCalc()" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300" required>
+              </div>
+              <div class="bg-emerald-950 border border-gold-500/40 rounded p-3 text-xs">
+                <div class="flex justify-between font-bold"><span>Amount credited after approval:</span><span id="cashin-net" class="font-mono text-gold-300">₱0.00</span></div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Reference Number</label>
+                <input type="text" id="cashin-ref" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300" required>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Upload Receipt Screenshot</label>
+                <input type="file" id="cashin-file" accept="image/*" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white text-xs file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-gold-500 file:text-emerald-950 hover:file:bg-gold-400 cursor-pointer" required>
+              </div>
+
+              <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black py-3 rounded-lg text-sm transition shadow-lg uppercase tracking-wider">
+                Submit Cash-In Request
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ==================== TAB 4: ENCASHMENT / CASH-OUT ==================== -->
+      <div id="view-cashout" class="tab-content hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <div class="emerald-card rounded-xl p-6 space-y-6">
+            <div>
+              <h3 class="text-xl font-bold text-gold-300 mb-4 border-b border-gold-500/30 pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-calculator text-gold-400"></i> Weekly Commission Payout Rules
+              </h3>
+
+              <div class="space-y-3 text-xs text-emerald-100">
+                <div class="bg-emerald-950 p-3 rounded border border-gold-500/40 flex items-start gap-2">
+                  <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
+                  <div><strong class="text-gold-300">Minimum Payout:</strong> ₱2,500. This is a Weekly Commission Payout.</div>
+                </div>
+                <div class="bg-emerald-950 p-3 rounded border border-gold-500/40 flex items-start gap-2">
+                  <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
+                  <div><strong class="text-gold-300">Schedule:</strong> Encashment cut-off is every Monday at 11:59 PM. Payouts are released every Wednesday, 10:00 AM–10:00 PM (Philippine Time).</div>
+                </div>
+                <div class="bg-emerald-950 p-3 rounded border border-gold-500/40 flex items-start gap-2">
+                  <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
+                  <div><strong class="text-gold-300">Deductions:</strong> 10% Withholding Tax + ₱100 Processing Fee. No P2P cash-out fee is deducted. Payout is calculated on 100% of the requested amount.</div>
+                </div>
+                <div class="bg-emerald-950 p-3 rounded border border-gold-500/40 flex items-start gap-2">
+                  <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
+                  <div><strong class="text-gold-300">Payout Channels:</strong> Official Check or Bank Wallet via Security Bank. GCash transfers are available; official Check requires at least ₱10,000.</div>
+                </div>
+              </div>
+
+              <div class="mt-6 bg-emerald-950 p-4 rounded-lg border-2 border-gold-400 space-y-2">
+                <h4 class="font-bold text-gold-300 uppercase text-xs">Weekly Commission Payout Preview</h4>
+                <div class="flex justify-between text-xs"><span>Requested Amount (100% basis):</span><span id="calc-gross" class="font-mono font-bold text-white">₱0.00</span></div>
+                <div class="flex justify-between text-xs"><span>Less 10% Tax:</span><span id="calc-tax" class="font-mono text-rose-400">-₱0.00</span></div>
+                <div class="flex justify-between text-xs"><span>Less Processing Fee:</span><span id="calc-fee" class="font-mono text-rose-400">-₱0.00</span></div>
+                <div class="border-t border-gold-500/50 pt-2 flex justify-between text-sm font-black">
+                  <span class="text-gold-300">NET PAYOUT AMOUNT:</span>
+                  <span id="calc-net" class="text-gold-400 font-mono text-base">₱0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- USER CASH-OUT HISTORY & STATUS -->
+            <div class="pt-4 border-t border-gold-500/30">
+              <h4 class="text-sm font-bold text-gold-300 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-history text-gold-400"></i> My Weekly Commission Payout History
+              </h4>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-emerald-100">
+                  <thead class="bg-emerald-950 text-gold-300 border-b border-gold-500/40 uppercase font-mono">
+                    <tr>
+                      <th class="p-2">ID & Channel</th>
+                      <th class="p-2">Gross / Net</th>
+                      <th class="p-2">Details</th>
+                      <th class="p-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="user-cashout-history" class="divide-y divide-emerald-800"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="emerald-card rounded-xl p-6">
+            <h3 class="text-xl font-bold text-gold-300 mb-4 border-b border-gold-500/30 pb-2 flex items-center gap-2">
+              <i class="fa-solid fa-money-check-dollar text-gold-400"></i> Request Weekly Commission Payout
+            </h3>
+
+            <form onsubmit="submitEncashment(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Weekly Commission Payout Amount (Min. ₱2,500)</label>
+                <input type="number" id="encash-amount" min="2500" step="0.01" oninput="updateEncashCalc()" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300" required>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gold-300 uppercase mb-1">Payout Channel</label>
+                <select id="encash-channel" onchange="toggleCheckOption()" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300" required>
+                  <option value="GCash">GCash Transfer</option>
+                  <option value="Bank">Bank Wallet (Security Bank)</option>
+                  <option value="Check" id="opt-check" disabled>Official Check (Min. ₱10,000)</option>
+                </select>
+              </div>
+              <div id="gcash-payout-fields" class="space-y-3">
+                <p class="text-xs text-emerald-200">Enter the name registered to GCash and its mobile number so the admin can send your payout.</p>
+                <div>
+                  <label for="encash-gcash-name" class="block text-xs font-bold text-gold-300 uppercase mb-1">GCash Account Name</label>
+                  <input type="text" id="encash-gcash-name" autocomplete="name" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300">
+                </div>
+                <div>
+                  <label for="encash-gcash-number" class="block text-xs font-bold text-gold-300 uppercase mb-1">GCash Mobile Number</label>
+                  <input type="tel" id="encash-gcash-number" inputmode="tel" autocomplete="tel" placeholder="09XXXXXXXXX" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300">
+                </div>
+              </div>
+              <div id="bank-payout-fields" class="hidden space-y-3">
+                <p class="text-xs text-emerald-200">Enter the bank and account details where the admin should send your payout.</p>
+                <div>
+                  <label for="encash-bank-name" class="block text-xs font-bold text-gold-300 uppercase mb-1">Bank Name</label>
+                  <input type="text" id="encash-bank-name" value="Security Bank" autocomplete="organization" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300">
+                </div>
+                <div>
+                  <label for="encash-bank-account-name" class="block text-xs font-bold text-gold-300 uppercase mb-1">Account Name</label>
+                  <input type="text" id="encash-bank-account-name" autocomplete="name" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300">
+                </div>
+                <div>
+                  <label for="encash-bank-account-number" class="block text-xs font-bold text-gold-300 uppercase mb-1">Account Number</label>
+                  <input type="text" id="encash-bank-account-number" inputmode="numeric" autocomplete="off" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300">
+                </div>
+              </div>
+              <div id="check-payout-fields" class="hidden space-y-3">
+                <p class="text-xs text-emerald-200">Provide the payee name and where you would like to receive the check.</p>
+                <div>
+                  <label for="encash-check-name" class="block text-xs font-bold text-gold-300 uppercase mb-1">Check Payee Name</label>
+                  <input type="text" id="encash-check-name" autocomplete="name" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300">
+                </div>
+                <div>
+                  <label for="encash-check-delivery" class="block text-xs font-bold text-gold-300 uppercase mb-1">Delivery or Pickup Details</label>
+                  <textarea id="encash-check-delivery" rows="2" class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-white text-sm focus:outline-none focus:border-gold-300"></textarea>
+                </div>
+              </div>
+              <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black py-3 rounded-lg text-sm transition shadow-lg uppercase tracking-wider">
+                Request Weekly Commission Payout
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ==================== TAB 5: MY REFERRAL LINK / QR CODE ==================== -->
+      <div id="view-referral" class="tab-content hidden space-y-6">
+        <div class="emerald-card rounded-xl p-6 space-y-6">
+          <div class="border-b border-gold-500/30 pb-3">
+            <h2 class="text-xl font-black text-gold-300 flex items-center gap-2">
+              <i class="fa-solid fa-people-arrows-left-right text-gold-400"></i> Referral Program
+            </h2>
+            <p class="text-xs text-emerald-100 mt-1">Earn ₱250 for each successful referral after admin approval and ₱50 for every repeat order they place.</p>
+          </div>
+
+          <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+            <div class="bg-emerald-950 p-4 rounded-lg border border-gold-500/40">
+              <p class="text-[11px] uppercase text-emerald-200">Total Referrals</p>
+              <p id="referral-total-count" class="text-2xl font-black text-gold-300 mt-1">0</p>
+            </div>
+            <div class="bg-emerald-950 p-4 rounded-lg border border-gold-500/40">
+              <p class="text-[11px] uppercase text-emerald-200">Total Earned</p>
+              <p id="referral-total-earned" class="text-2xl font-black text-gold-300 mt-1">₱0.00</p>
+            </div>
+            <div class="bg-emerald-950 p-4 rounded-lg border border-gold-500/40">
+              <p class="text-[11px] uppercase text-emerald-200">Available Balance</p>
+              <p id="referral-available-balance" class="text-2xl font-black text-gold-300 mt-1">₱0.00</p>
+            </div>
+            <div class="bg-emerald-950 p-4 rounded-lg border border-gold-500/40">
+              <p class="text-[11px] uppercase text-emerald-200">Pending Balance</p>
+              <p id="referral-pending-balance" class="text-2xl font-black text-gold-300 mt-1">₱0.00</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <div>
+                <label for="user-ref-code" class="block text-xs font-bold text-gold-300 uppercase mb-1">Your Referral Code</label>
+                <input type="text" id="user-ref-code" readonly class="w-full bg-emerald-950 border border-gold-500 rounded p-2.5 text-gold-300 font-mono text-sm">
+              </div>
+              <div>
+                <label for="user-ref-link-input" class="block text-xs font-bold text-gold-300 uppercase mb-1">Your Referral Link</label>
+                <div class="flex gap-2">
+                  <input type="text" id="user-ref-link-input" readonly class="w-full min-w-0 bg-emerald-950 border border-gold-500 rounded p-2.5 text-gold-300 font-mono text-xs">
+                  <button onclick="copyUserRefLink()" class="shrink-0 bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold px-4 py-2 rounded text-xs transition uppercase">
+                    <i class="fa-regular fa-copy mr-1"></i> Copy Link
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-center bg-emerald-950 p-4 rounded-lg border border-gold-500/50 space-y-3">
+              <p class="text-xs font-bold text-gold-300 uppercase">Your Personal QR Code</p>
+              <div id="user-qrcode-container" class="inline-block bg-white p-3 rounded border border-gold-500 shadow"></div>
+              <p class="text-[11px] text-emerald-200">Scan to open registration with your referral code.</p>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-gold-500/30">
+            <h3 class="text-sm font-bold text-gold-300 mb-3">Rewards History</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-emerald-100">
+                <thead class="bg-emerald-950 text-gold-300 border-b border-gold-500/40 uppercase font-mono">
+                  <tr><th class="p-2">Date</th><th class="p-2">Referred Member</th><th class="p-2">Reward</th><th class="p-2">Amount</th><th class="p-2">Status</th></tr>
+                </thead>
+                <tbody id="referral-rewards-history" class="divide-y divide-emerald-800"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 5.5: SPIN & WIN GAME ==================== -->
+      <div id="view-spin" class="tab-content hidden space-y-6">
+        <div class="emerald-card rounded-xl p-3 sm:p-6 max-w-3xl mx-auto text-center space-y-4 sm:space-y-6">
+          <div>
+            <h2 class="text-2xl font-black gold-gradient-text uppercase">JRDC Gold Spin & Win Roleta</h2>
+            <p class="text-xs text-emerald-100 mt-1">Enjoy 1 Free Daily Spin upon login or use Royalty Points (1 Point = 1 Spin).</p>
+          </div>
+
+          <!-- Spin Balance Stats -->
+          <div class="flex justify-center gap-4">
+            <div class="bg-emerald-950 border border-gold-500/60 px-4 py-2 rounded-lg">
+              <span class="text-[11px] text-emerald-200 block">Daily Free Spin Status</span>
+              <span id="free-spin-status" class="text-sm font-bold text-gold-400">Available (1 Free)</span>
+            </div>
+            <div class="bg-emerald-950 border border-gold-500/60 px-4 py-2 rounded-lg">
+              <span class="text-[11px] text-emerald-200 block">Royalty Points Available</span>
+              <span id="spin-royalty-pts" class="text-sm font-bold text-gold-300">0 PTS</span>
+            </div>
+          </div>
+
+          <!-- REALISTIC WHEEL CONTAINER -->
+          <div class="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 mx-auto flex items-center justify-center">
+            <!-- Pointer Arrow on top -->
+            <div class="absolute -top-4 z-30 w-8 h-8 text-gold-400 drop-shadow-lg flex items-center justify-center">
+              <i class="fa-solid fa-location-pin text-3xl"></i>
+            </div>
+            
+            <!-- Outer Golden Rim -->
+            <div class="w-full h-full rounded-full bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-600 p-2 shadow-2xl flex items-center justify-center relative">
+              <!-- Wheel Canvas -->
+              <canvas id="wheel-canvas" width="320" height="320" class="w-full h-full rounded-full bg-emerald-950 shadow-inner cursor-pointer"></canvas>
+              <!-- Center Hub -->
+              <div class="absolute w-16 h-16 rounded-full bg-gradient-to-br from-gold-400 to-gold-700 border-4 border-emerald-950 shadow-lg flex items-center justify-center text-emerald-950 font-black text-xs uppercase z-20">
+                JRDC
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3">
+            <button onclick="spinWheel('free')" id="free-spin-btn" class="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-[11px] sm:text-sm transition shadow-lg uppercase tracking-wider">
+              Use Daily Free Spin
+            </button>
+            <button onclick="spinWheel('points')" id="points-spin-btn" class="bg-emerald-800 hover:bg-emerald-700 text-gold-300 border border-gold-500 font-bold px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-[11px] sm:text-sm transition shadow-lg uppercase tracking-wider">
+              Use 1 Royalty Point (1 Spin)
+            </button>
+          </div>
+
+          <!-- MEMBER SPIN HISTORY -->
+          <div class="pt-6 border-t border-gold-500/30 text-left">
+            <h4 class="text-sm font-bold text-gold-300 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-clock-rotate-left text-gold-400"></i> My Spin & Win History
+            </h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-emerald-100">
+                <thead class="bg-emerald-950 text-gold-300 border-b border-gold-500/40 uppercase font-mono">
+                  <tr>
+                    <th class="p-2.5">Prize Won</th>
+                    <th class="p-2.5">Type</th>
+                    <th class="p-2.5">Date</th>
+                    <th class="p-2.5">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="user-spin-history" class="divide-y divide-emerald-800"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 6: ABOUT US ==================== -->
+      <div id="view-about" class="tab-content hidden space-y-6">
+        <div class="emerald-card rounded-xl p-3 sm:p-5">
+          <iframe
+            src="JRDC_Gold_International_Website_Company_Profile_Print_Ready.pdf"
+            title="JRDC Gold International Company Profile"
+            class="w-full h-[85vh] rounded-xl border-2 border-gold-500 shadow-2xl"
+          ></iframe>
+          <p class="text-center text-xs text-emerald-100 mt-3">
+            If the PDF does not display,
+            <a href="JRDC_Gold_International_Website_Company_Profile_Print_Ready.pdf" target="_blank" rel="noopener" class="text-gold-300 underline">open the Company Profile</a>.
+          </p>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 7: ADMIN PANEL ==================== -->
+      <div id="view-admin" class="tab-content hidden space-y-6">
+        <div class="emerald-card rounded-xl p-5 border-2 border-gold-400 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 class="text-2xl font-black text-white flex items-center gap-2">
+              <i class="fa-solid fa-user-shield text-gold-400"></i> System Admin Dashboard
+            </h2>
+            <p class="text-xs text-emerald-100 mt-1">Manage inventory, store orders, incentive claims, user balances, accounts, spin prizes, and payouts.</p>
+          </div>
+          <button onclick="openAdminSettingsModal()" class="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold px-4 py-2 rounded-lg text-xs transition flex items-center gap-2">
+            <i class="fa-solid fa-user-gear"></i> Admin Account Settings
+          </button>
+        </div>
+
+        <!-- MODULE: REGISTERED USERS FINANCIALS & REDEEMED GCS MONITOR -->
+        <div class="emerald-card rounded-xl p-6">
+          <h3 class="text-lg font-bold text-gold-300 mb-3 border-b border-gold-500/30 pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-users-line text-gold-400"></i> Registered Users Financials, Accounts & Management
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-emerald-100">
+              <thead class="bg-emerald-950 text-gold-300 border-b border-gold-500/40 uppercase font-mono">
+                <tr>
+                  <th class="p-2.5">User ID / Name / Email</th>
+                  <th class="p-2.5">Available Balance</th>
+                  <th class="p-2.5">Total Earnings</th>
+                  <th class="p-2.5">Points (Royalty / EGP / EDP)</th>
+                  <th class="p-2.5">Redeemed GCs</th>
+                  <th class="p-2.5 text-right">Actions (Edit / Delete)</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-financial-table" class="divide-y divide-emerald-800"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- REFERRAL LINK & QR CODE GENERATOR -->
+          <div class="emerald-card rounded-xl p-6">
+            <h3 class="text-lg font-bold text-gold-300 mb-3 border-b border-gold-500/30 pb-2 flex items-center gap-2">
+              <i class="fa-solid fa-qrcode text-gold-400"></i> Referral Link & QR Code Creator
+            </h3>
+            <form onsubmit="generateRefLink(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-bold text-gold-300 mb-1">Entry Code Type</label>
+                <select id="link-type" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white text-xs">
+                  <option value="PAID">PAID CODE (Standard ₱2,500 Package)</option>
+                  <option value="FREE">FREE CODE (Pastor / Madre / Orphan Promo)</option>
+                  <option value="CD">CD CODE (20% Commission Deduction until ₱2.5k paid)</option>
+                </select>
+              </div>
+              <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold py-2 rounded text-xs transition">
+                Generate Referral Link & QR Code
+              </button>
+            </form>
+            <div id="generated-link-box" class="mt-3 hidden bg-emerald-950 p-3 rounded border border-gold-400 space-y-3 text-center">
+              <div>
+                <p class="text-xs text-emerald-100 mb-1 font-bold text-left">Generated Link:</p>
+                <input type="text" id="gen-link-val" readonly class="w-full bg-emerald-900 border border-gold-500/50 p-1.5 text-gold-300 text-xs font-mono rounded">
+                <button onclick="copyLink()" class="mt-2 text-xs bg-emerald-800 hover:bg-emerald-700 text-gold-300 border border-gold-500 px-3 py-1 rounded">
+                  Copy Link
+                </button>
+              </div>
+              <div class="border-t border-gold-500/30 pt-3">
+                <p class="text-xs text-emerald-100 mb-2 font-bold">Generated QR Code:</p>
+                <div id="admin-qrcode-container" class="inline-block bg-white p-2 rounded border border-gold-500"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MANUAL POINTS ADJUSTMENT WITH CLICK-TO-SELECT -->
+          <div class="emerald-card rounded-xl p-6">
+            <h3 class="text-lg font-bold text-gold-300 mb-3 border-b border-gold-500/30 pb-2 flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-gold-400"></i> Manual User Points & Balance Adjustment
+            </h3>
+            <form onsubmit="adjustUserPoints(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-bold text-gold-300 mb-1">Select User (Click to Choose)</label>
+                <input type="text" id="search-user-input" placeholder="Search user name or ID..." oninput="filterUserDropdown()" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white text-xs mb-1">
+                <select id="adj-userid" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white text-xs font-mono cursor-pointer" size="3" required></select>
+                <p class="text-[10px] text-gold-300 mt-1 italic">*Click directly on any user above to select them.</p>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-xs font-bold text-gold-300 mb-1">Adjustment Field</label>
+                  <select id="adj-field" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white text-xs">
+                    <option value="balance">Available Balance (₱)</option>
+                    <option value="royalty">Royalty Points</option>
+                    <option value="egp">Elite Gold Points (EGP)</option>
+                    <option value="edp">Elite Diamond Points (EDP)</option>
+                    <option value="commission">Commission & Incentives</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gold-300 mb-1">Action</label>
+                  <select id="adj-action" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white text-xs">
+                    <option value="add">Add (+)</option>
+                    <option value="deduct">Deduct (-)</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gold-300 mb-1">Value / Amount</label>
+                <input type="number" id="adj-val" min="1" step="any" placeholder="100" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white text-xs" required>
+              </div>
+              <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold py-2 rounded text-xs transition">
+                Apply Points Adjustment
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="emerald-card rounded-xl p-6">
+          <div class="flex justify-between items-center mb-4 border-b border-gold-500/30 pb-2">
+            <h3 class="text-lg font-bold text-gold-300 flex items-center gap-2">
+              <i class="fa-solid fa-boxes-packing text-gold-400"></i> Store & Inventory Manager (Editable)
+            </h3>
+            <button onclick="openAddProductModal()" class="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold px-3 py-1.5 rounded text-xs">
+              + Add New Product
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-emerald-100">
+              <thead class="bg-emerald-950 text-gold-300 border-b border-gold-500/40 uppercase font-mono">
+                <tr>
+                  <th class="p-2.5">Product Name</th>
+                  <th class="p-2.5">Category</th>
+                  <th class="p-2.5">Member Price</th>
+                  <th class="p-2.5">Stock</th>
+                  <th class="p-2.5">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-products-table" class="divide-y divide-emerald-800"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SPIN PRIZES ENCODER -->
+        <div class="emerald-card rounded-xl p-6 space-y-4">
+          <div class="flex justify-between items-center border-b border-gold-500/30 pb-2">
+            <h3 class="text-lg font-bold text-gold-300 flex items-center gap-2">
+              <i class="fa-solid fa-dharmachakra text-gold-400"></i> Encode Spin & Win Wheel Prizes
+            </h3>
+          </div>
+          <form onsubmit="saveSpinPrize(event)" class="space-y-3 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label class="block font-bold text-gold-300 mb-1">Prize Title</label>
+                <input type="text" id="admin-prize-title" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white" placeholder="e.g. Spin Bonus" required>
+              </div>
+              <div>
+                <label class="block font-bold text-gold-300 mb-1">Points Category</label>
+                <select id="admin-prize-field" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white">
+                  <option value="Balance">Balance</option>
+                  <option value="Royalty">Royalty</option>
+                  <option value="EGP">EGP</option>
+                  <option value="EDP">EDP</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-gold-300 mb-1">Prize Type</label>
+                <input type="text" id="admin-prize-type" value="Points" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white" readonly>
+              </div>
+              <div>
+                <label class="block font-bold text-gold-300 mb-1">Value / Details</label>
+                <input type="number" id="admin-prize-val" min="0.01" step="any" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white" placeholder="Enter a numeric points value" required>
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold py-2.5 rounded transition uppercase tracking-wider">
+              Add Prize to Wheel
+            </button>
+          </form>
+
+          <!-- Current Admin Prizes List -->
+          <div class="pt-2">
+            <h4 class="text-xs font-bold text-gold-300 mb-2">Current Active Wheel Prizes:</h4>
+            <div id="admin-prizes-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+          </div>
+        </div>
+
+        <!-- CASH-IN & CASH-OUT QUEUES -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="emerald-card rounded-xl p-6">
+            <h3 class="text-lg font-bold text-gold-300 mb-3 border-b border-gold-500/30 pb-2">Pending Cash-In Queue</h3>
+            <div id="admin-cashin-queue" class="space-y-3"></div>
+          </div>
+          <div class="emerald-card rounded-xl p-6">
+            <h3 class="text-lg font-bold text-gold-300 mb-3 border-b border-gold-500/30 pb-2">Pending Weekly Commission Payouts</h3>
+            <div id="admin-cashout-queue" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- PENDING PRODUCT PRIZE QUEUE -->
+        <div class="emerald-card rounded-xl p-6">
+          <h3 class="text-lg font-bold text-gold-300 mb-3 border-b border-gold-500/30 pb-2">Pending Product Prize Approval</h3>
+          <div id="admin-spin-queue" class="space-y-3"></div>
+        </div>
+
+        <div class="emerald-card rounded-xl p-6">
+          <h3 class="text-lg font-bold text-gold-300 mb-3 border-b border-gold-500/30 pb-2">Pending Store Purchase Approvals</h3>
+          <div id="admin-purchase-queue" class="space-y-3"></div>
+        </div>
+
+        <div class="emerald-card rounded-xl p-6">
+          <h3 class="text-lg font-bold text-gold-300 mb-3 border-b border-gold-500/30 pb-2">Pending Incentive Claims</h3>
+          <div id="admin-redemption-queue" class="space-y-3"></div>
+        </div>
+
+        <div class="emerald-card rounded-xl p-6">
+          <h3 class="text-lg font-bold text-gold-300 mb-3 border-b border-gold-500/30 pb-2">Pending ₱250 Referral Commission Approvals</h3>
+          <div id="admin-referral-queue" class="space-y-3"></div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-emerald-950 border-t border-gold-600/30 py-4 mt-auto">
+      <div class="max-w-7xl mx-auto px-4 text-center text-xs text-emerald-100 flex flex-col sm:flex-row justify-between items-center gap-2">
+        <p>© 2026 JRDC GOLD INTERNATIONAL. All Rights Reserved.</p>
+        <span class="text-[11px] text-emerald-400 font-mono">Secure Member Portal</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODALS -->
+  <div id="qr-zoom-modal" class="fixed inset-0 bg-emerald-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4" onclick="closeQrModal()">
+    <div class="emerald-card rounded-xl border-2 border-gold-400 max-w-sm w-full p-4 text-center space-y-3" onclick="event.stopPropagation()">
+      <div class="flex justify-between items-center border-b border-gold-500/30 pb-2">
+        <h3 id="qr-modal-title" class="text-sm font-bold text-gold-300">QR Code</h3>
+        <button onclick="closeQrModal()" class="text-emerald-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <img id="qr-modal-img" src="" alt="Zoomed QR" class="w-full max-h-96 object-contain rounded border border-gold-500/50 bg-white p-2">
+      <p class="text-[11px] text-emerald-200">Save or screenshot this image for verification.</p>
+    </div>
+  </div>
+
+  <div id="cart-modal" class="fixed inset-0 bg-emerald-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="emerald-card rounded-xl border-2 border-gold-400 max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-gold-500/30 pb-2">
+        <h3 class="text-xl font-bold text-gold-300 flex items-center gap-2">
+          <i class="fa-solid fa-cart-shopping text-gold-400"></i> Shopping Checkout
+        </h3>
+        <button onclick="closeCartModal()" class="text-emerald-300 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="cart-items-list" class="space-y-2 divide-y divide-emerald-800"></div>
+      <div class="border-t border-gold-500/40 pt-3 flex justify-between text-sm font-bold">
+        <span>Total Payable:</span>
+        <span id="cart-total-amount" class="text-gold-400 text-base font-mono">₱0.00</span>
+      </div>
+      <div class="space-y-2 pt-2 border-t border-gold-500/30">
+        <label class="block text-xs font-bold text-gold-300 uppercase">Choose Payment Option</label>
+        <label class="flex items-center gap-2 bg-emerald-950 p-3 rounded border border-gold-500 cursor-pointer">
+          <input type="radio" name="pay-option" value="WALLET" checked class="accent-gold-500">
+          <div>
+            <strong class="text-xs text-white block">Option A: Wallet Balance (100% Full Value)</strong>
+            <span class="text-[10px] text-emerald-200">Deduct directly from your available balance.</span>
+          </div>
+        </label>
+        <label class="flex items-center gap-2 bg-emerald-950 p-3 rounded border border-gold-500 cursor-pointer">
+          <input type="radio" name="pay-option" value="DIRECT" class="accent-gold-500">
+          <div>
+            <strong class="text-xs text-white block">Option B: Direct Payment (GCash / BDO QR Code)</strong>
+            <span class="text-[10px] text-emerald-200">Pay via GCash or BDO and upload receipt.</span>
+          </div>
+        </label>
+      </div>
+      <button onclick="processCheckout()" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black py-3 rounded-lg text-sm transition shadow-lg uppercase tracking-wider">
+        Confirm & Process Order
+      </button>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT PRODUCT MODAL -->
+  <div id="product-modal" class="fixed inset-0 bg-emerald-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="emerald-card rounded-xl border-2 border-gold-400 max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-gold-500/30 pb-2">
+        <h3 id="prod-modal-title" class="text-xl font-bold text-gold-300 flex items-center gap-2">
+          <i class="fa-solid fa-box-open text-gold-400"></i> Add New Product to Store
+        </h3>
+        <button onclick="closeAddProductModal()" class="text-emerald-300 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="saveProduct(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="edit-prod-id" value="">
+        <div>
+          <label class="block font-bold text-gold-300 mb-1">Product Title</label>
+          <input type="text" id="new-prod-name" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white" required>
+        </div>
+        <div>
+          <label class="block font-bold text-gold-300 mb-1">Category</label>
+          <select id="new-prod-cat" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white">
+            <option value="Package Kit">₱2,500 Entry Package Kit</option>
+            <option value="Retail Items">Retail Items / Repeat Orders</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-gold-300 mb-1">Member Price (₱)</label>
+            <input type="number" id="new-prod-price" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white" required>
+          </div>
+          <div>
+            <label class="block font-bold text-gold-300 mb-1">Stock</label>
+            <input type="number" id="new-prod-stock" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white" required>
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-gold-300 mb-1">Product Image File</label>
+          <input type="file" id="new-prod-file" accept="image/*" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-bold file:bg-gold-500 file:text-emerald-950 hover:file:bg-gold-400 cursor-pointer">
+        </div>
+        <div>
+          <label class="block font-bold text-gold-300 mb-1">Description</label>
+          <textarea id="new-prod-desc" rows="2" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white" required></textarea>
+        </div>
+        <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold py-2.5 rounded transition uppercase tracking-wider">
+          Save Product Details
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN EDIT USER ACCOUNT MODAL -->
+  <div id="admin-edit-user-modal" class="fixed inset-0 bg-emerald-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="emerald-card rounded-xl border-2 border-gold-400 max-w-sm w-full p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-gold-500/30 pb-2">
+        <h3 class="text-base font-bold text-gold-300 flex items-center gap-2">
+          <i class="fa-solid fa-user-pen text-gold-400"></i> Edit User Account
+        </h3>
+        <button onclick="closeAdminEditUserModal()" class="text-emerald-300 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="saveAdminEditedUser(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="edit-user-id-target">
+        <div>
+          <label class="block font-bold text-gold-300 mb-1">Full Name</label>
+          <input type="text" id="edit-user-name" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white" required>
+        </div>
+        <p class="text-[11px] text-emerald-200">Only the profile name can be changed here. Login email and password are managed through Supabase Auth.</p>
+        <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold py-2.5 rounded transition uppercase tracking-wider">
+          Save Changes
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN ACCOUNT SETTINGS MODAL -->
+  <div id="admin-settings-modal" class="fixed inset-0 bg-emerald-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="emerald-card rounded-xl border-2 border-gold-400 max-w-sm w-full p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-gold-500/30 pb-2">
+        <h3 class="text-base font-bold text-gold-300 flex items-center gap-2">
+          <i class="fa-solid fa-user-gear text-gold-400"></i> Admin Account Settings
+        </h3>
+        <button onclick="closeAdminSettingsModal()" class="text-emerald-300 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="saveAdminSettings(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-gold-300 mb-1">Admin Email</label>
+          <input type="email" id="admin-setting-email" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white" required>
+        </div>
+        <div>
+          <label class="block font-bold text-gold-300 mb-1">Admin Password</label>
+          <input type="password" id="admin-setting-pass" autocomplete="new-password" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white" placeholder="Leave blank to keep current password">
+        </div>
+        <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold py-2.5 rounded transition uppercase tracking-wider">
+          Update Admin Credentials
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- RECEIPT VIEW MODAL FOR ADMIN -->
+  <div id="receipt-modal" class="fixed inset-0 bg-emerald-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4" onclick="closeReceiptModal()">
+    <div class="emerald-card rounded-xl border-2 border-gold-400 max-w-md w-full p-5 space-y-3 text-center" onclick="event.stopPropagation()">
+      <div class="flex justify-between items-center border-b border-gold-500/30 pb-2">
+        <h3 class="text-sm font-bold text-gold-300">Transaction Receipt Proof</h3>
+        <button onclick="closeReceiptModal()" class="text-emerald-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <img id="receipt-modal-img" src="" alt="Receipt Proof" class="w-full max-h-96 object-contain rounded border border-gold-500/50 bg-white p-2">
+      <div id="receipt-modal-details" class="text-xs text-left text-emerald-100 bg-emerald-900 p-3 rounded space-y-1"></div>
+    </div>
+  </div>
+
+  <!-- CHANGE EMAIL MODAL -->
+  <div id="email-modal" class="fixed inset-0 bg-emerald-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="emerald-card rounded-xl border-2 border-gold-400 max-w-sm w-full p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-gold-500/30 pb-2">
+        <h3 class="text-base font-bold text-gold-300 flex items-center gap-2">
+          <i class="fa-solid fa-envelope text-gold-400"></i> Change Email Address
+        </h3>
+        <button onclick="closeChangeEmailModal()" class="text-emerald-300 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="saveNewEmail(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-gold-300 mb-1">New Email Address</label>
+          <input type="email" id="modal-new-email" class="w-full bg-emerald-950 border border-gold-500 rounded p-2 text-white" required>
+        </div>
+        <button type="submit" class="w-full bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold py-2.5 rounded transition uppercase tracking-wider">
+          Update Email
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-emerald-900 border-2 border-gold-400 text-emerald-50 px-5 py-3 rounded-lg shadow-2xl hidden flex items-center gap-3">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-gold-400 text-xl"></i>
+    <span id="toast-message" class="text-xs font-bold">Action completed successfully.</span>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    const state = {
+      isAdmin: false,
+      authUser: null,
+      realtimeChannel: null,
+      registrationType: 'PAID',
+      spinPrizes: [],
+      user: {
+        id: "",
+        name: "",
+        email: "",
+        pass: "",
+        directMembers: 0,
+        balance: 0,
+        totalEarnings: 0,
+        commission: 0,
+        royaltyPoints: 0,
+        egp: 0,
+        edp: 0,
+        gcs: 0,
+        avatar: "https://placehold.co/100x100/047857/facc15?text=User",
+        lastFreeSpinDate: "",
+        redemptions: [],
+        storeOrders: [],
+        cashIns: [],
+        cashOuts: [],
+        spinHistory: []
+      },
+      registeredUsers: [],
+      products: [],
+      productImageCache: new Map(),
+      productImageRequests: new Set(),
+      productImageObserver: null,
+      cart: [],
+      pendingCashIns: [],
+      pendingCashOuts: [],
+      pendingSpins: [],
+      pendingReferralRewards: [],
+      pendingPurchases: [],
+      pendingRedemptions: []
+    };
+
+    window.addEventListener('pageshow', function() {
+      const loginForm = document.querySelector('#form-login form');
+      if (loginForm) loginForm.reset();
+    });
+
+    window.onload = async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get('ref') || urlParams.get('referral_code') || '';
+      const requestedType = (urlParams.get('type') || 'PAID').toUpperCase();
+      state.registrationType = ['FREE', 'CD', 'PAID'].includes(requestedType) ? requestedType : 'PAID';
+      document.getElementById('reg-code').value = refCode;
+
+      updateUserDisplay();
+      renderShopProducts();
+      renderAdminProducts();
+      renderAdminUsersFinancials();
+      renderUserDropdown();
+      renderAdminQueues();
+      renderUserHistoryTables();
+      generateUserReferralSection();
+      updateCashInCalc();
+      updateEncashCalc();
+      drawWheel(0);
+      renderAdminPrizes();
+
+      try {
+        const restored = await restoreAuthSession();
+        document.getElementById('auth-loading-view').classList.add('hidden');
+        if (!restored) {
+          document.getElementById('auth-view').classList.remove('hidden');
+        }
+      } catch (sessionError) {
+        showAuthRestoreError(sessionError);
+      }
+    };
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3500);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[character]);
+    }
+
+    function switchAuthMode(mode) {
+      document.getElementById('form-login').classList.add('hidden');
+      document.getElementById('form-register').classList.add('hidden');
+      document.getElementById('form-forgot').classList.add('hidden');
+
+      if (mode === 'register') {
+        document.getElementById('form-register').classList.remove('hidden');
+      } else if (mode === 'forgot') {
+        document.getElementById('form-forgot').classList.remove('hidden');
+      } else {
+        document.getElementById('form-login').classList.remove('hidden');
+      }
+    }
+
+    function mapDatabaseUser(row) {
+      return {
+        id: row.id,
+        authUserId: row.auth_user_id,
+        name: row.name,
+        email: row.email,
+        directMembers: Number(row.direct_members || 0),
+        balance: Number(row.balance || 0) - Number(row.reserved_balance || 0),
+        totalEarnings: Number(row.total_earnings || 0),
+        commission: Number(row.commission || 0),
+        royalty: Number(row.royalty || 0),
+        royaltyPoints: Number(row.royalty || 0),
+        egp: Number(row.egp || 0),
+        edp: Number(row.edp || 0),
+        gcs: Number(row.gcs || 0),
+        avatar: row.avatar_url || "https://placehold.co/100x100/047857/facc15?text=" + encodeURIComponent((row.name || "U").charAt(0)),
+        lastFreeSpinDate: row.last_free_spin_date || "",
+        redemptions: [],
+        storeOrders: [],
+        cashIns: [],
+        cashOuts: [],
+        spinHistory: []
+      };
+    }
+
+    async function loadCurrentUser(authUser, { includeMemberData = true } = {}) {
+      const { data: row, error } = await window.supabaseClient
+        .from('users')
+        .select('*')
+        .eq('auth_user_id', authUser.id)
+        .single();
+      if (error) throw error;
+
+      state.user = mapDatabaseUser(row);
+      updateUserDisplay();
+      if (includeMemberData) {
+        await loadMemberDashboardData();
+      }
+      return row;
+    }
+
+    async function loadMemberDashboardData() {
+      const userId = state.user.id;
+      const [cashInsResult, cashOutsResult, spinsResult, redemptionsResult, purchasesResult] = await Promise.all([
+        window.supabaseClient.from('cash_ins').select('id, amount, credited_amount, method, ref_no, status')
+          .eq('user_id', userId).order('id'),
+        window.supabaseClient.from('cash_outs').select('id, amount, net, channel, details, status')
+          .eq('user_id', userId).order('id'),
+        window.supabaseClient.from('pending_spins').select('id, prize, prize_type, created_at, status')
+          .eq('user_id', userId).order('created_at', { ascending: false }),
+        window.supabaseClient.from('portal_redemptions').select('id, title, gcs, created_at, status')
+          .eq('user_id', userId).order('created_at', { ascending: false }),
+        window.supabaseClient.from('portal_purchases').select('id, amount, items, created_at, status')
+          .eq('user_id', userId).order('created_at', { ascending: false })
+      ]);
+      const failedResult = [cashInsResult, cashOutsResult, spinsResult, redemptionsResult, purchasesResult].find(result => result.error);
+      if (failedResult) throw failedResult.error;
+
+      state.user.cashIns = cashInsResult.data.map(item => ({
+        id: item.id,
+        amount: Number(item.amount),
+        creditedAmount: item.credited_amount == null ? null : Number(item.credited_amount),
+        method: item.method,
+        ref: item.ref_no,
+        status: item.status
+      }));
+      state.user.cashOuts = cashOutsResult.data.map(item => ({
+        id: item.id,
+        amount: Number(item.amount),
+        net: Number(item.net),
+        channel: item.channel,
+        details: item.details,
+        status: item.status
+      }));
+      state.user.spinHistory = spinsResult.data.map(item => ({
+        id: item.id,
+        prize: item.prize,
+        type: item.prize_type,
+        date: item.created_at.slice(0, 10),
+        status: item.prize_type === 'Points' && item.status === 'Approved' ? 'Credited' : item.status
+      }));
+      state.user.redemptions = redemptionsResult.data.map(item => ({
+        id: item.id,
+        title: item.title,
+        gcs: Number(item.gcs),
+        date: item.created_at.slice(0, 10),
+        status: item.status
+      }));
+      state.user.storeOrders = purchasesResult.data.map(item => ({
+        id: item.id,
+        amount: Number(item.amount),
+        items: Array.isArray(item.items) ? item.items : [],
+        date: item.created_at.slice(0, 10),
+        status: item.status
+      }));
+      renderUserHistoryTables();
+      generateUserReferralSection();
+      await loadReferralSummary();
+    }
+
+    async function refreshAdminData() {
+      const [usersResult, adminsResult, cashInsResult, cashOutsResult, spinsResult, referralRewardsResult, purchasesResult, redemptionsResult] = await Promise.all([
+        window.supabaseClient.from('users')
+          .select('id, auth_user_id, name, email, direct_members, balance, reserved_balance, total_earnings, commission, royalty, egp, edp, gcs, last_free_spin_date')
+          .order('id'),
+        window.supabaseClient.from('portal_admins').select('auth_user_id'),
+        window.supabaseClient.from('cash_ins')
+          .select('id, user_id, amount, credited_amount, method, ref_no, status')
+          .eq('status', 'Pending').order('id'),
+        window.supabaseClient.from('cash_outs')
+          .select('id, user_id, amount, net, channel, details, status')
+          .eq('status', 'Pending').order('id'),
+        window.supabaseClient.from('pending_spins')
+          .select('id, user_id, prize, prize_type, created_at, status')
+          .eq('status', 'Pending').neq('prize_type', 'Points')
+          .order('created_at', { ascending: false }),
+        window.supabaseClient.from('portal_referral_rewards')
+          .select('id, referrer_user_id, referred_user_id, amount, created_at')
+          .eq('reward_type', 'direct_invite').eq('status', 'Pending')
+          .order('created_at', { ascending: false }),
+        window.supabaseClient.from('portal_purchases')
+          .select('id, user_id, amount, items, created_at')
+          .eq('status', 'Pending').order('created_at', { ascending: false }),
+        window.supabaseClient.from('portal_redemptions')
+          .select('id, user_id, title, gcs, created_at')
+          .in('status', ['Pending', 'Pending / Processing']).order('created_at', { ascending: false })
+      ]);
+      const failedResult = [usersResult, adminsResult, cashInsResult, cashOutsResult, spinsResult, referralRewardsResult, purchasesResult, redemptionsResult].find(result => result.error);
+      if (failedResult) throw failedResult.error;
+
+      const allUsers = usersResult.data.map(mapDatabaseUser);
+      const adminAuthUserIds = new Set(adminsResult.data.map(admin => admin.auth_user_id));
+      state.registeredUsers = allUsers.filter(user => !adminAuthUserIds.has(user.authUserId));
+      const usersById = new Map(allUsers.map(user => [user.id, user]));
+      state.pendingCashIns = cashInsResult.data.map(item => ({
+          id: item.id,
+          userId: item.user_id,
+          name: usersById.get(item.user_id)?.name || 'Unknown user',
+          email: usersById.get(item.user_id)?.email || '',
+          amount: Number(item.amount),
+          creditedAmount: item.credited_amount == null ? Number(item.amount) : Number(item.credited_amount),
+          method: item.method,
+          ref: item.ref_no,
+          status: item.status
+        }));
+      state.pendingCashOuts = cashOutsResult.data.map(item => ({
+          id: item.id,
+          userId: item.user_id,
+          name: usersById.get(item.user_id)?.name || 'Unknown user',
+          email: usersById.get(item.user_id)?.email || '',
+          amount: Number(item.amount),
+          net: Number(item.net),
+          channel: item.channel,
+          details: item.details,
+          status: item.status
+        }));
+      state.pendingSpins = spinsResult.data.map(item => ({
+          id: item.id,
+          userId: item.user_id,
+          name: usersById.get(item.user_id)?.name || 'Unknown user',
+          email: usersById.get(item.user_id)?.email || '',
+          prize: item.prize,
+          type: item.prize_type,
+          date: item.created_at.slice(0, 10),
+          status: item.status
+        }));
+      state.pendingReferralRewards = referralRewardsResult.data.map(item => ({
+        id: item.id,
+        referrerUserId: item.referrer_user_id,
+        referrerName: usersById.get(item.referrer_user_id)?.name || 'Unknown referrer',
+        referredUserId: item.referred_user_id,
+        referredName: usersById.get(item.referred_user_id)?.name || 'Unknown member',
+        amount: Number(item.amount),
+        date: item.created_at.slice(0, 10)
+      }));
+      state.pendingPurchases = purchasesResult.data.map(item => ({
+        id: item.id,
+        userId: item.user_id,
+        name: usersById.get(item.user_id)?.name || 'Unknown user',
+        email: usersById.get(item.user_id)?.email || '',
+        amount: Number(item.amount),
+        items: Array.isArray(item.items) ? item.items : [],
+        date: item.created_at.slice(0, 10)
+      }));
+      state.pendingRedemptions = redemptionsResult.data.map(item => ({
+        id: item.id,
+        userId: item.user_id,
+        name: usersById.get(item.user_id)?.name || 'Unknown user',
+        email: usersById.get(item.user_id)?.email || '',
+        title: item.title,
+        gcs: Number(item.gcs),
+        date: item.created_at.slice(0, 10)
+      }));
+      renderAdminUsersFinancials();
+      renderUserDropdown();
+      renderAdminQueues();
+    }
+
+    async function loadSharedRecords() {
+      const [productsResult, prizesResult] = await Promise.all([
+        window.supabaseClient.from('portal_products')
+          .select('id, name, category, price, stock, description, active').order('id'),
+        window.supabaseClient.from('portal_spin_prizes')
+          .select('id, title, prize_type, value').eq('active', true).order('id')
+      ]);
+      if (productsResult.error) throw productsResult.error;
+      if (prizesResult.error) throw prizesResult.error;
+      state.products = productsResult.data.map(item => ({
+        id: Number(item.id),
+        name: item.name,
+        category: item.category,
+        price: Number(item.price),
+        stock: Number(item.stock),
+        desc: item.description,
+        image: state.productImageCache.get(Number(item.id)) || '',
+        active: item.active
+      }));
+      state.spinPrizes = prizesResult.data.map(item => ({
+        id: Number(item.id),
+        title: item.title,
+        type: item.prize_type,
+        val: item.value
+      }));
+      renderShopProducts();
+      renderAdminProducts();
+      observeProductImages();
+      renderAdminPrizes();
+      drawWheel(0);
+    }
+
+    function showDashboardLoadError(error) {
+      const message = escapeHtml(error?.message || String(error));
+      if (state.isAdmin) {
+        const errorMessage = `
+          <p class="text-xs text-rose-300">
+            Unable to load admin data: ${message}
+            <button onclick="retryDashboardData()" class="ml-2 text-gold-300 underline font-bold">Retry</button>
+          </p>
+        `;
+        document.getElementById('admin-users-financial-table').innerHTML =
+          `<tr><td colspan="6" class="p-4">${errorMessage}</td></tr>`;
+        for (const id of [
+          'admin-cashin-queue',
+          'admin-cashout-queue',
+          'admin-spin-queue',
+          'admin-purchase-queue',
+          'admin-redemption-queue',
+          'admin-referral-queue'
+        ]) {
+          document.getElementById(id).innerHTML = errorMessage;
+        }
+      }
+      showToast("Dashboard data failed to load: " + (error?.message || String(error)));
+    }
+
+    async function retryDashboardData() {
+      try {
+        await Promise.all([
+          loadSharedRecords(),
+          ...(state.isAdmin ? [refreshAdminData()] : [loadMemberDashboardData()])
+        ]);
+        showToast("Dashboard data refreshed successfully.");
+      } catch (error) {
+        showDashboardLoadError(error);
+      }
+    }
+
+    function observeProductImages() {
+      const images = document.querySelectorAll('img[data-product-image-id]');
+      if (!('IntersectionObserver' in window)) {
+        images.forEach(image => loadProductImage(image.dataset.productImageId));
+        return;
+      }
+
+      if (!state.productImageObserver) {
+        state.productImageObserver = new IntersectionObserver(entries => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            state.productImageObserver.unobserve(entry.target);
+            loadProductImage(entry.target.dataset.productImageId);
+          }
+        }, { rootMargin: '150px' });
+      }
+      images.forEach(image => {
+        if (image.dataset.productImageLoaded !== 'true') state.productImageObserver.observe(image);
+      });
+    }
+
+    async function loadProductImage(productId) {
+      const id = Number(productId);
+      if (!Number.isSafeInteger(id) || state.productImageCache.has(id) || state.productImageRequests.has(id)) return;
+      state.productImageRequests.add(id);
+      try {
+        const { data, error } = await window.supabaseClient.from('portal_products')
+          .select('image_url').eq('id', id).maybeSingle();
+        if (error) throw error;
+        if (!data) return;
+
+        const image = data.image_url || 'https://placehold.co/300x200/064e3b/facc15?text=JRDC+Product';
+        state.productImageCache.set(id, image);
+        const product = state.products.find(item => item.id === id);
+        if (product) product.image = image;
+        document.querySelectorAll('img[data-product-image-id]').forEach(element => {
+          if (Number(element.dataset.productImageId) === id) {
+            element.src = image;
+            element.dataset.productImageLoaded = 'true';
+          }
+        });
+      } catch (error) {
+        showToast("Product image failed to load: " + error.message);
+      } finally {
+        state.productImageRequests.delete(id);
+      }
+    }
+
+    async function enterPortal(authUser) {
+      state.authUser = authUser;
+      const [adminResult] = await Promise.all([
+        window.supabaseClient.from('portal_admins')
+          .select('auth_user_id')
+          .eq('auth_user_id', authUser.id)
+          .maybeSingle(),
+        loadCurrentUser(authUser, { includeMemberData: false })
+      ]);
+      if (adminResult.error) throw adminResult.error;
+      state.isAdmin = Boolean(adminResult.data);
+
+      if (state.isAdmin) {
+        document.getElementById('user-profile-bar').classList.add('hidden');
+        document.getElementById('tab-admin').classList.remove('hidden');
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+          if (tab.id !== 'tab-admin') tab.classList.add('hidden');
+        });
+        document.getElementById('admin-users-financial-table').innerHTML =
+          '<tr><td colspan="6" class="p-4 text-center text-emerald-200">Loading admin data...</td></tr>';
+        document.getElementById('admin-cashin-queue').innerHTML =
+          '<p class="text-xs text-emerald-200">Loading admin data...</p>';
+        document.getElementById('admin-cashout-queue').innerHTML =
+          '<p class="text-xs text-emerald-200">Loading admin data...</p>';
+        document.getElementById('admin-spin-queue').innerHTML =
+          '<p class="text-xs text-emerald-200">Loading admin data...</p>';
+        document.getElementById('admin-purchase-queue').innerHTML =
+          '<p class="text-xs text-emerald-200">Loading admin data...</p>';
+        document.getElementById('admin-redemption-queue').innerHTML =
+          '<p class="text-xs text-emerald-200">Loading admin data...</p>';
+        document.getElementById('admin-referral-queue').innerHTML =
+          '<p class="text-xs text-emerald-200">Loading admin data...</p>';
+        switchTab('admin');
+      } else {
+        document.getElementById('user-profile-bar').classList.remove('hidden');
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+          if (tab.id === 'tab-admin') tab.classList.add('hidden');
+          else tab.classList.remove('hidden');
+        });
+        checkDailyFreeSpin();
+        switchTab('overview');
+        showToast(`Welcome, ${state.user.name}!`);
+      }
+
+      document.getElementById('auth-view').classList.add('hidden');
+      document.getElementById('auth-loading-view').classList.add('hidden');
+      document.getElementById('main-app-container').classList.remove('hidden');
+
+      subscribePortalRealtime().catch(error => showToast("Realtime connection failed: " + error.message));
+      const dashboardLoads = [
+        loadSharedRecords(),
+        ...(state.isAdmin ? [refreshAdminData()] : [loadMemberDashboardData()])
+      ];
+      Promise.all(dashboardLoads).catch(showDashboardLoadError);
+
+      if (authUser.user_metadata?.referral_notification_pending === true) {
+        window.supabaseClient.functions.invoke('referral-notification', {
+          body: { authUserId: authUser.id }
+        }).then(({ error: notificationError }) => {
+          if (notificationError) {
+            showToast("Referrer notification email failed: " + notificationError.message);
+          } else {
+            authUser.user_metadata.referral_notification_pending = false;
+          }
+        }).catch(notificationError => {
+          showToast("Referrer notification email failed: " + String(notificationError));
+        });
+      }
+    }
+
+    async function restoreAuthSession() {
+      const { data, error } = await window.supabaseClient.auth.getSession();
+      if (error) throw error;
+      if (!data.session) return false;
+      await enterPortal(data.session.user);
+      return true;
+    }
+
+    function showAuthRestoreError(error) {
+      document.getElementById('main-app-container').classList.add('hidden');
+      document.getElementById('auth-view').classList.add('hidden');
+      document.getElementById('auth-loading-view').classList.remove('hidden');
+      document.getElementById('auth-restore-icon').classList.remove('fa-spinner', 'fa-spin');
+      document.getElementById('auth-restore-icon').classList.add('fa-circle-exclamation');
+      document.getElementById('auth-restore-message').innerText =
+        "Your session could not be restored. Your sign-in was not cleared. " + error.message;
+      document.getElementById('auth-restore-retry').classList.remove('hidden');
+      showToast("Unable to restore account: " + error.message);
+    }
+
+    async function retryAuthRestore() {
+      const retryButton = document.getElementById('auth-restore-retry');
+      retryButton.disabled = true;
+      retryButton.classList.add('hidden');
+      document.getElementById('auth-restore-icon').classList.remove('fa-circle-exclamation');
+      document.getElementById('auth-restore-icon').classList.add('fa-spinner', 'fa-spin');
+      document.getElementById('auth-restore-message').innerText = "Restoring your session...";
+      try {
+        const restored = await restoreAuthSession();
+        document.getElementById('auth-loading-view').classList.add('hidden');
+        if (!restored) document.getElementById('auth-view').classList.remove('hidden');
+      } catch (error) {
+        showAuthRestoreError(error);
+      } finally {
+        retryButton.disabled = false;
+      }
+    }
+
+    async function subscribePortalRealtime() {
+      if (state.realtimeChannel) {
+        await window.supabaseClient.removeChannel(state.realtimeChannel);
+      }
+      let channel = window.supabaseClient.channel(`portal-${state.authUser.id}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, payload => {
+          const changedId = payload.new?.id || payload.old?.id;
+          if (state.isAdmin) {
+            refreshAdminData().catch(error => showToast("Admin refresh failed: " + error.message));
+            if (changedId === state.user.id) {
+              loadCurrentUser(state.authUser).catch(error => showToast("Profile refresh failed: " + error.message));
+            }
+          } else if (changedId === state.user.id) {
+            loadCurrentUser(state.authUser).catch(error => showToast("Profile refresh failed: " + error.message));
+          }
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'portal_products' }, () => {
+          loadSharedRecords().catch(error => showToast("Product refresh failed: " + error.message));
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'portal_spin_prizes' }, () => {
+          loadSharedRecords().catch(error => showToast("Prize refresh failed: " + error.message));
+        });
+
+      if (state.isAdmin) {
+        for (const table of ['cash_ins', 'cash_outs', 'pending_spins', 'portal_referral_rewards', 'portal_purchases', 'portal_redemptions']) {
+          channel = channel.on('postgres_changes', { event: '*', schema: 'public', table }, () => {
+            refreshAdminData().catch(error => showToast("Queue refresh failed: " + error.message));
+          });
+        }
+      } else {
+        for (const table of ['pending_spins', 'portal_redemptions', 'portal_purchases']) {
+          channel = channel.on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table,
+            filter: `user_id=eq.${state.user.id}`
+          }, () => {
+            loadCurrentUser(state.authUser).catch(error => showToast("History refresh failed: " + error.message));
+          });
+        }
+      }
+      state.realtimeChannel = channel.subscribe();
+    }
+
+    async function handleUnifiedLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-user').value.trim().toLowerCase();
+      const password = document.getElementById('login-pass').value;
+      const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        showToast("Login failed: " + error.message);
+        return;
+      }
+      try {
+        await enterPortal(data.user);
+      } catch (sessionError) {
+        showToast("Unable to load account: " + sessionError.message);
+      }
+    }
+
+    function checkDailyFreeSpin() {
+      const today = new Date().toISOString().split('T')[0];
+      if (state.user.lastFreeSpinDate !== today) {
+        document.getElementById('free-spin-status').innerText = "Available (1 Free)";
+        document.getElementById('free-spin-btn').disabled = false;
+      } else {
+        document.getElementById('free-spin-status').innerText = "Already Claimed Today";
+        document.getElementById('free-spin-btn').disabled = true;
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-pass').value;
+      const referralCode = document.getElementById('reg-code').value.trim();
+      const referrerId = referralCode || null;
+      const { data, error } = await window.supabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}${window.location.pathname}`,
+          data: {
+            name,
+            referrer_id: referrerId,
+            entry_type: state.registrationType,
+            referral_notification_pending: Boolean(referrerId)
+          }
+        }
+      });
+      if (error) {
+        showToast("Registration failed: " + error.message);
+        return;
+      }
+      if (!data.session) {
+        showToast("Registration created. Confirm your email, then sign in.");
+        switchAuthMode('login');
+        return;
+      }
+      try {
+        await enterPortal(data.user);
+      } catch (sessionError) {
+        showToast("Account created but profile could not load: " + sessionError.message);
+      }
+    }
+
+    async function handleForgot(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgot-input').value.trim().toLowerCase();
+      const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}${window.location.pathname}`
+      });
+      if (error) { showToast("Password reset failed: " + error.message); return; }
+      showToast("If the account exists, a password reset email has been sent.");
+      switchAuthMode('login');
+    }
+
+    async function handleLogout() {
+      if (state.realtimeChannel) {
+        await window.supabaseClient.removeChannel(state.realtimeChannel);
+        state.realtimeChannel = null;
+      }
+      await window.supabaseClient.auth.signOut();
+      state.authUser = null;
+      state.isAdmin = false;
+      state.user = {
+        id: "", name: "", email: "", directMembers: 0, balance: 0,
+        totalEarnings: 0, commission: 0, royalty: 0, royaltyPoints: 0,
+        egp: 0, edp: 0, gcs: 0,
+        avatar: "https://placehold.co/100x100/047857/facc15?text=User",
+        lastFreeSpinDate: "", redemptions: [], storeOrders: [], cashIns: [], cashOuts: [], spinHistory: []
+      };
+      updateUserDisplay();
+      document.getElementById('main-app-container').classList.add('hidden');
+      document.getElementById('auth-view').classList.remove('hidden');
+      document.getElementById('login-user').value = '';
+      document.getElementById('login-pass').value = '';
+      document.getElementById('login-user').focus();
+      switchAuthMode('login');
+      showToast("Logged out successfully.");
+    }
+
+    function getRank(count) {
+      if (count >= 120) return "Diamond Alpha Mentor";
+      if (count >= 75) return "Platinum Alpha Mentor";
+      if (count >= 50) return "Gold Alpha Mentor";
+      if (count >= 25) return "Silver Alpha Mentor";
+      if (count >= 5) return "Bronze Alpha Mentor";
+      return "New Member";
+    }
+
+    function updateUserDisplay() {
+      const rank = getRank(state.user.directMembers);
+      document.getElementById('user-name-display').innerText = state.user.name;
+      document.getElementById('user-avatar').src = state.user.avatar;
+      document.getElementById('rank-name').innerText = rank;
+      document.getElementById('direct-count').innerText = state.user.directMembers;
+      document.getElementById('user-id-display').innerText = state.user.id;
+      document.getElementById('user-email-display').innerText = state.user.email;
+      const formattedBal = `₱${state.user.balance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('header-balance').innerText = formattedBal;
+      document.getElementById('dash-balance').innerText = formattedBal;
+      document.getElementById('header-royalty').innerText = `${state.user.royaltyPoints} PTS`;
+      document.getElementById('spin-royalty-pts').innerText = `${state.user.royaltyPoints} PTS`;
+      document.getElementById('pts-royalty').innerText = `${state.user.royaltyPoints} PTS`;
+      document.getElementById('pts-egp').innerText = `EGP ${state.user.egp.toFixed(3)}`;
+      document.getElementById('pts-edp').innerText = `EDP ${state.user.edp.toFixed(3)}`;
+      document.getElementById('dash-total-earnings').innerText = `₱${state.user.totalEarnings.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('dash-commission').innerText = `₱${state.user.commission.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('user-gc-count').innerText = `${state.user.gcs} GCs`;
+    }
+
+    function openChangeEmailModal() {
+      document.getElementById('modal-new-email').value = state.user.email;
+      document.getElementById('email-modal').classList.remove('hidden');
+    }
+    function closeChangeEmailModal() { document.getElementById('email-modal').classList.add('hidden'); }
+    async function saveNewEmail(e) {
+      e.preventDefault();
+      const newEmail = document.getElementById('modal-new-email').value.trim().toLowerCase();
+      const { error } = await window.supabaseClient.auth.updateUser({ email: newEmail });
+      if (error) { showToast("Email update failed: " + error.message); return; }
+      closeChangeEmailModal();
+      showToast("Confirm the email change using the link sent to your inbox.");
+    }
+
+    function switchTab(tabKey) {
+      if (tabKey === 'admin' && !state.isAdmin) {
+        showToast("Access Denied: Admin privileges required.");
+        return;
+      }
+      if (state.isAdmin && tabKey !== 'admin') {
+        showToast("Member dashboard is unavailable to admin accounts.");
+        return;
+      }
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-tab').forEach(el => {
+        el.classList.remove('text-gold-300', 'border-b-2', 'border-gold-400', 'bg-emerald-800/60');
+        el.classList.add('text-emerald-100');
+      });
+      document.getElementById(`view-${tabKey}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-${tabKey}`);
+      if (activeBtn) {
+        activeBtn.classList.add('text-gold-300', 'border-b-2', 'border-gold-400', 'bg-emerald-800/60');
+        activeBtn.classList.remove('text-emerald-100');
+      }
+      if (tabKey === 'spin') {
+        drawWheel(0);
+      }
+      if (tabKey === 'referral') {
+        loadReferralSummary().catch(error => showToast("Referral data failed to load: " + error.message));
+      }
+    }
+
+    function openQrModal(imgSrc, title) {
+      document.getElementById('qr-modal-img').src = imgSrc;
+      document.getElementById('qr-modal-title').innerText = title;
+      document.getElementById('qr-zoom-modal').classList.remove('hidden');
+    }
+    function closeQrModal() { document.getElementById('qr-zoom-modal').classList.add('hidden'); }
+
+    function openReceiptModal(imgSrc, detailsText) {
+      document.getElementById('receipt-modal-img').src = imgSrc;
+      document.getElementById('receipt-modal-details').innerHTML = detailsText;
+      document.getElementById('receipt-modal').classList.add('hidden'); // placeholder
+      document.getElementById('receipt-modal').classList.remove('hidden');
+    }
+    function closeReceiptModal() { document.getElementById('receipt-modal').classList.add('hidden'); }
+
+    async function changeProfilePic(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const avatarUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Unable to read profile image"));
+        reader.readAsDataURL(file);
+      });
+      const { error } = await window.supabaseClient.from('users')
+        .update({ avatar_url: avatarUrl }).eq('auth_user_id', state.authUser.id);
+      if (error) { showToast("Profile image update failed: " + error.message); return; }
+      await loadCurrentUser(state.authUser);
+      showToast("Profile picture updated successfully!");
+    }
+
+    // REALISTIC CANVAS WHEEL RENDERING & SPIN LOGIC
+    function drawWheel(angleOffset = 0) {
+      const canvas = document.getElementById('wheel-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const prizes = state.spinPrizes;
+      const numSlices = prizes.length;
+      const arcSize = (2 * Math.PI) / numSlices;
+      const radius = canvas.width / 2;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.translate(radius, radius);
+      ctx.rotate(angleOffset);
+
+      const colors = ['#047857', '#065f46', '#059669', '#064e3b', '#022c22', '#10b981'];
+
+      for (let i = 0; i < numSlices; i++) {
+        const startAngle = i * arcSize;
+        const endAngle = (i + 1) * arcSize;
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius - 6, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#facc15';
+        ctx.stroke();
+
+        ctx.save();
+        ctx.rotate(startAngle + arcSize / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#fde047";
+        ctx.font = "bold 11px Inter, sans-serif";
+        ctx.fillText(prizes[i].title, radius - 25, 5);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    function playSpinSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        let tone = 150;
+        for (let i = 0; i < 25; i++) {
+          setTimeout(() => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = tone;
+            gain.gain.setValueAtTime(0.08, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.08);
+            tone += 25;
+          }, i * 140);
+        }
+      } catch(e) {}
+    }
+
+    async function spinWheel(mode) {
+      if (!state.authUser) {
+        showToast("Please sign in before spinning.");
+        return;
+      }
+      if (!state.spinPrizes.length) {
+        showToast("No active prizes are configured. Ask the admin to add prizes.");
+        return;
+      }
+
+      let spin;
+      try {
+        const { data, error } = await window.supabaseClient.rpc('submit_spin', { p_mode: mode });
+        if (error) throw error;
+        spin = Array.isArray(data) ? data[0] : data;
+        if (!spin) throw new Error("Spin was not recorded.");
+        await loadCurrentUser(state.authUser);
+        checkDailyFreeSpin();
+      } catch (error) {
+        showToast("Spin failed: " + (error.message || "Check your connection and Supabase setup."));
+        return;
+      }
+      playSpinSound();
+      const prizes = state.spinPrizes;
+      const winningIndex = prizes.findIndex(prize => prize.title === spin.prize);
+      if (winningIndex < 0) { showToast("Spin saved, but prize list is unavailable. Check your history."); return; }
+      const arcSize = (2 * Math.PI) / prizes.length;
+      
+      // Calculate target angle so pointer lands on winningIndex
+      const targetAngle = (2 * Math.PI * 5) + ((prizes.length - winningIndex) * arcSize) - (arcSize / 2);
+
+      let currentAngle = 0;
+      const startTime = performance.now();
+      const duration = 3500;
+
+      function animateSpin(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // easeOutCubic
+        const ease = 1 - Math.pow(1 - progress, 3);
+        currentAngle = ease * targetAngle;
+
+        drawWheel(currentAngle);
+
+        if (progress < 1) {
+          requestAnimationFrame(animateSpin);
+        } else {
+          const wonPrize = prizes[winningIndex];
+          renderUserHistoryTables();
+          showToast(`Congratulations! You won ${wonPrize.title} (${wonPrize.type})! The prize has been credited to your account.`);
+        }
+      }
+      requestAnimationFrame(animateSpin);
+    }
+
+    async function saveSpinPrize(e) {
+      e.preventDefault();
+      const baseTitle = document.getElementById('admin-prize-title').value.trim();
+      const field = document.getElementById('admin-prize-field').value;
+      const title = `${baseTitle} (${field})`;
+      const type = document.getElementById('admin-prize-type').value;
+      const val = Number(document.getElementById('admin-prize-val').value);
+      if (!baseTitle || !['Balance', 'Royalty', 'EGP', 'EDP'].includes(field) || !Number.isFinite(val) || val <= 0) {
+        showToast("Enter a prize title, points category, and positive numeric value.");
+        return;
+      }
+      if (field === 'Royalty' && !Number.isInteger(val)) {
+        showToast("Royalty point prizes must be whole numbers.");
+        return;
+      }
+      const { error } = await window.supabaseClient.from('portal_spin_prizes').insert({
+        title,
+        prize_type: type,
+        value: String(val)
+      });
+      if (error) { showToast("Unable to add prize: " + error.message); return; }
+      e.target.reset();
+      await loadSharedRecords();
+      showToast("New wheel prize successfully added!");
+    }
+
+    function renderAdminPrizes() {
+      const container = document.getElementById('admin-prizes-list');
+      if (!container) return;
+      container.innerHTML = state.spinPrizes.map((p, idx) => `
+        <div class="bg-emerald-950 p-2.5 rounded border border-gold-500/40 flex justify-between items-center text-xs">
+          <div>
+            <strong class="text-white">${p.title}</strong>
+            <span class="text-[10px] text-gold-300 block">Type: ${p.type} | Val: ${p.val}</span>
+          </div>
+          <button onclick="deleteSpinPrize(${idx})" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `).join('');
+    }
+
+    async function deleteSpinPrize(idx) {
+      if (state.spinPrizes.length <= 3) {
+        showToast("Roleta must have at least 3 prizes.");
+        return;
+      }
+      const prize = state.spinPrizes[idx];
+      const { error } = await window.supabaseClient.from('portal_spin_prizes')
+        .update({ active: false }).eq('id', prize.id);
+      if (error) { showToast("Unable to remove prize: " + error.message); return; }
+      await loadSharedRecords();
+      showToast("Prize removed from wheel.");
+    }
+
+    function renderShopProducts() {
+      const container = document.getElementById('shop-products-grid');
+      container.innerHTML = state.products.filter(p => p.active).map(p => `
+        <div class="emerald-card rounded-xl p-4 flex flex-col justify-between hover:border-gold-400 transition">
+          <div>
+            <img src="${p.image || 'https://placehold.co/300x200/064e3b/facc15?text=JRDC+Product'}" data-product-image-id="${p.id}" data-product-image-loaded="${Boolean(p.image)}" loading="lazy" alt="${p.name}" class="w-full h-40 object-cover rounded-lg border border-gold-500/30 mb-3 bg-white p-1">
+            <span class="bg-emerald-950 text-gold-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase border border-gold-500/40">${p.category}</span>
+            <h4 class="font-bold text-white text-base mt-1">${p.name}</h4>
+            <p class="text-xs text-emerald-100 mt-1">${p.desc}</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gold-500/30 flex items-center justify-between">
+            <div>
+              <span class="text-xs text-emerald-200 block">Member Price</span>
+              <span class="text-lg font-black text-gold-400 font-mono">₱${p.price.toLocaleString()}</span>
+            </div>
+            <button onclick="addToCart(${p.id})" class="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-extrabold px-3 py-1.5 rounded text-xs transition flex items-center gap-1">
+              <i class="fa-solid fa-cart-plus"></i> Add
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addToCart(prodId) {
+      const prod = state.products.find(p => p.id === prodId);
+      const existing = state.cart.find(c => c.id === prodId);
+      if (existing) { existing.qty += 1; } else { state.cart.push({ ...prod, qty: 1 }); }
+      updateCartCount();
+      showToast(`Added ${prod.name} to cart.`);
+    }
+
+    function updateCartCount() {
+      const total = state.cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cart-count').innerText = total;
+    }
+
+    function openCartModal() {
+      const list = document.getElementById('cart-items-list');
+      if (state.cart.length === 0) {
+        list.innerHTML = `<p class="text-xs text-center text-emerald-200 py-4">Your cart is empty.</p>`;
+      } else {
+        list.innerHTML = state.cart.map(item => `
+          <div class="flex justify-between items-center py-2">
+            <div>
+              <h5 class="text-xs font-bold text-white">${item.name}</h5>
+              <span class="text-[10px] text-gold-300 font-mono">₱${item.price.toLocaleString()} x ${item.qty}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-gold-400 font-mono">₱${(item.price * item.qty).toLocaleString()}</span>
+              <button onclick="removeFromCart(${item.id})" class="text-rose-400 text-xs hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+        `).join('');
+      }
+      const grandTotal = state.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      document.getElementById('cart-total-amount').innerText = `₱${grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('cart-modal').classList.remove('hidden');
+    }
+
+    function closeCartModal() { document.getElementById('cart-modal').classList.add('hidden'); }
+    function removeFromCart(id) {
+      state.cart = state.cart.filter(item => item.id !== id);
+      updateCartCount();
+      openCartModal();
+    }
+
+    async function processCheckout() {
+      const total = state.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      if (total === 0) { showToast("Cart is empty."); return; }
+      const paymentMethod = document.querySelector('input[name="pay-option"]:checked').value;
+      if (paymentMethod === "WALLET") {
+        const { error } = await window.supabaseClient.rpc('submit_portal_purchase', {
+          p_items: state.cart.map(item => ({ id: item.id, qty: item.qty }))
+        });
+        if (error) { showToast("Order request failed: " + error.message); return; }
+        state.cart = [];
+        updateCartCount();
+        closeCartModal();
+        await loadCurrentUser(state.authUser);
+        showToast("Order submitted for admin approval. Your wallet amount is reserved until it is approved or rejected.");
+      } else {
+        closeCartModal();
+        switchTab('cashin');
+        document.getElementById('cashin-amount').value = total.toFixed(2);
+        updateCashInCalc();
+        showToast("Submit a cash-in request and wait for admin approval. Then return to your cart to submit the store order.");
+      }
+    }
+
+    function submitCashIn(e) {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('cashin-amount').value);
+      const method = document.getElementById('cashin-method').value;
+      const ref = document.getElementById('cashin-ref').value;
+      const fileInput = document.getElementById('cashin-file');
+      
+      let receiptImg = "https://placehold.co/300x400/064e3b/facc15?text=Uploaded+Receipt";
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          receiptImg = ev.target.result;
+          pushCashInQueue(amount, method, ref, receiptImg, e.target);
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        pushCashInQueue(amount, method, ref, receiptImg, e.target);
+      }
+    }
+
+    async function pushCashInQueue(amount, method, ref, receiptImg, form) {
+      const { error } = await window.supabaseClient.rpc('submit_cash_in', {
+        p_amount: amount,
+        p_method: method,
+        p_ref_no: ref,
+        p_receipt: receiptImg
+      });
+      if (error) { showToast("Cash-in request failed: " + error.message); return; }
+      if (form) {
+        form.reset();
+        updateCashInCalc();
+      }
+      await loadCurrentUser(state.authUser);
+      showToast("Cash-in request saved for admin verification. The full amount will be credited after approval.");
+    }
+
+    function updateCashInCalc() {
+      const amount = parseFloat(document.getElementById('cashin-amount').value) || 0;
+      document.getElementById('cashin-net').innerText = `₱${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+    }
+
+    function updateEncashCalc() {
+      const gross = parseFloat(document.getElementById('encash-amount').value) || 0;
+      const channel = document.getElementById('encash-channel').value;
+      const checkOpt = document.getElementById('opt-check');
+      if (gross >= 10000) {
+        checkOpt.removeAttribute('disabled');
+      } else {
+        checkOpt.setAttribute('disabled', 'true');
+        if (channel === "Check") {
+          document.getElementById('encash-channel').value = "GCash";
+        }
+      }
+      document.getElementById('calc-gross').innerText = `₱${gross.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      const eligible = gross >= 2500;
+      const tax = eligible ? Math.round(gross * 0.10 * 100) / 100 : 0;
+      const fee = eligible ? 100 : 0;
+      const net = eligible ? Math.max(0, Math.round((gross - tax - fee) * 100) / 100) : 0;
+      document.getElementById('calc-tax').innerText = `-₱${tax.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('calc-fee').innerText = `-₱${fee.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('calc-net').innerText = `₱${net.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      updatePayoutDetailsFields();
+    }
+
+    function toggleCheckOption() { updateEncashCalc(); }
+
+    function updatePayoutDetailsFields() {
+      const channel = document.getElementById('encash-channel').value;
+      const fields = {
+        GCash: ['gcash-payout-fields', ['encash-gcash-name', 'encash-gcash-number']],
+        Bank: ['bank-payout-fields', ['encash-bank-name', 'encash-bank-account-name', 'encash-bank-account-number']],
+        Check: ['check-payout-fields', ['encash-check-name', 'encash-check-delivery']]
+      };
+      Object.entries(fields).forEach(([method, [containerId, inputIds]]) => {
+        const isSelected = method === channel;
+        document.getElementById(containerId).classList.toggle('hidden', !isSelected);
+        inputIds.forEach(id => {
+          document.getElementById(id).required = isSelected;
+        });
+      });
+    }
+
+    async function submitEncashment(e) {
+      e.preventDefault();
+      const gross = parseFloat(document.getElementById('encash-amount').value);
+      if (!Number.isFinite(gross) || gross < 2500) { showToast("Minimum weekly commission payout is ₱2,500."); return; }
+      const channel = document.getElementById('encash-channel').value;
+      if (channel === 'Check' && gross < 10000) {
+        showToast("Official Check payouts require at least ₱10,000.");
+        return;
+      }
+      const detailValues = {
+        GCash: [
+          ['GCash account name', 'encash-gcash-name'],
+          ['GCash mobile number', 'encash-gcash-number']
+        ],
+        Bank: [
+          ['Bank name', 'encash-bank-name'],
+          ['Account name', 'encash-bank-account-name'],
+          ['Account number', 'encash-bank-account-number']
+        ],
+        Check: [
+          ['Check payee name', 'encash-check-name'],
+          ['Delivery or pickup details', 'encash-check-delivery']
+        ]
+      };
+      const details = detailValues[channel]
+        .map(([label, id]) => `${label}: ${document.getElementById(id).value.trim()}`)
+        .join('\n');
+      const { error } = await window.supabaseClient.rpc('submit_cash_out', {
+        p_amount: gross,
+        p_channel: channel,
+        p_details: details
+      });
+      if (error) { showToast("Cash-out request failed: " + error.message); return; }
+      await loadCurrentUser(state.authUser);
+      e.target.reset();
+      updateEncashCalc();
+      showToast("Weekly Commission Payout request saved for processing at the next scheduled payout.");
+    }
+
+    function renderUserHistoryTables() {
+      const redBody = document.getElementById('user-redemption-history');
+      if (redBody) {
+        redBody.innerHTML = state.user.redemptions.map(r => {
+          const statusClass = String(r.status).startsWith('Approved')
+            ? 'bg-emerald-800 text-gold-300 border border-gold-500'
+            : r.status === 'Rejected'
+              ? 'bg-rose-950 text-rose-300 border border-rose-500'
+              : 'bg-amber-950 text-amber-300 border border-amber-500';
+          return `
+            <tr>
+              <td class="p-2.5 font-bold text-white">${escapeHtml(r.title)}</td>
+              <td class="p-2.5 font-mono text-gold-300">${r.gcs} GC</td>
+              <td class="p-2.5 font-mono">${escapeHtml(r.date)}</td>
+              <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusClass}">${escapeHtml(r.status)}</span></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const spinBody = document.getElementById('user-spin-history');
+      if (spinBody) {
+        spinBody.innerHTML = state.user.spinHistory.map(s => {
+          const statusClass = s.status === 'Pending'
+            ? 'bg-amber-950 text-amber-300 border border-amber-500'
+            : s.status === 'Rejected'
+              ? 'bg-rose-950 text-rose-300 border border-rose-500'
+              : 'bg-emerald-800 text-gold-300 border border-gold-500';
+          return `
+          <tr>
+            <td class="p-2.5 font-bold text-white">${s.prize}</td>
+            <td class="p-2.5 text-gold-300">${s.type}</td>
+            <td class="p-2.5 font-mono">${s.date}</td>
+            <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusClass}">${s.status}</span></td>
+          </tr>
+          `;
+        }).join('');
+      }
+
+      const ciBody = document.getElementById('user-cashin-history');
+      if (ciBody) {
+        ciBody.innerHTML = state.user.cashIns.map(ci => {
+          const creditedAmount = ci.creditedAmount ?? (ci.status === 'Pending' ? ci.amount : null);
+          const creditedLabel = creditedAmount == null
+            ? 'not recorded'
+            : '₱' + creditedAmount.toLocaleString('en-US', {minimumFractionDigits: 2}) + (ci.status === 'Pending' ? ' est.' : '');
+          const statusClass = ci.status === 'Approved'
+            ? 'bg-emerald-800 text-gold-300 border border-gold-500'
+            : ci.status === 'Rejected'
+              ? 'bg-rose-950 text-rose-300 border border-rose-500'
+              : 'bg-amber-950 text-amber-300 border border-amber-500';
+          return `
+          <tr>
+            <td class="p-2 font-mono">${ci.id}<br><span class="text-[10px] text-gold-300">${ci.method}</span></td>
+            <td class="p-2 font-mono text-white">₱${ci.amount.toLocaleString('en-US', {minimumFractionDigits: 2})}<br><span class="text-[10px] text-gold-300">Credited: ${creditedLabel}</span></td>
+            <td class="p-2 font-mono">${ci.ref}</td>
+            <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusClass}">${ci.status}</span></td>
+          </tr>
+          `;
+        }).join('');
+      }
+
+      const coBody = document.getElementById('user-cashout-history');
+      if (coBody) {
+        coBody.innerHTML = state.user.cashOuts.map(co => {
+          const statusClass = ['Approved', 'Completed'].includes(co.status)
+            ? 'bg-emerald-800 text-gold-300 border border-gold-500'
+            : co.status === 'Rejected'
+              ? 'bg-rose-950 text-rose-300 border border-rose-500'
+              : 'bg-amber-950 text-amber-300 border border-amber-500';
+          return `
+          <tr>
+            <td class="p-2 font-mono">${co.id}<br><span class="text-[10px] text-gold-300">${co.channel}</span></td>
+            <td class="p-2 font-mono">₱${co.amount.toLocaleString()}<br><strong class="text-gold-400">Net: ₱${co.net.toLocaleString()}</strong></td>
+            <td class="p-2 whitespace-pre-line">${escapeHtml(co.details)}</td>
+            <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusClass}">${co.status}</span></td>
+          </tr>
+          `;
+        }).join('');
+      }
+
+      const purchaseBody = document.getElementById('user-store-orders');
+      if (purchaseBody) {
+        purchaseBody.innerHTML = state.user.storeOrders.length ? state.user.storeOrders.map(order => {
+          const itemsLabel = order.items.map(item => `${escapeHtml(item.name || `Product ${item.id}`)} x ${Number(item.qty)}`).join(', ');
+          const statusClass = order.status === 'Approved'
+            ? 'bg-emerald-800 text-gold-300 border border-gold-500'
+            : order.status === 'Rejected'
+              ? 'bg-rose-950 text-rose-300 border border-rose-500'
+              : 'bg-amber-950 text-amber-300 border border-amber-500';
+          return `
+            <tr>
+              <td class="p-2.5 font-mono">${escapeHtml(order.id)}</td>
+              <td class="p-2.5">${itemsLabel}</td>
+              <td class="p-2.5 font-mono text-gold-300">₱${order.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+              <td class="p-2.5 font-mono">${escapeHtml(order.date)}</td>
+              <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusClass}">${escapeHtml(order.status)}</span></td>
+            </tr>
+          `;
+        }).join('') : '<tr><td colspan="5" class="p-4 text-center text-emerald-200">No store orders yet.</td></tr>';
+      }
+    }
+
+    function generateUserReferralSection() {
+      const pageUrl = `${window.location.origin}${window.location.pathname}`;
+      const link = `${pageUrl}?ref=${encodeURIComponent(state.user.id)}&type=PAID`;
+      const input = document.getElementById('user-ref-link-input');
+      if (input) input.value = link;
+      const codeInput = document.getElementById('user-ref-code');
+      if (codeInput) codeInput.value = state.user.id || '';
+
+      const qrContainer = document.getElementById('user-qrcode-container');
+      if (qrContainer) {
+        qrContainer.innerHTML = "";
+        new QRCode(qrContainer, {
+          text: link,
+          width: 128,
+          height: 128,
+          colorDark: "#022c22",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      }
+    }
+
+    async function loadReferralSummary() {
+      if (!state.user.id) return;
+      const [referralsResult, rewardsResult] = await Promise.all([
+        window.supabaseClient.from('portal_referrals').select('referred_user_id,status,created_at')
+          .eq('referrer_user_id', String(state.user.id)).order('created_at', { ascending: false }),
+        window.supabaseClient.from('portal_referral_rewards').select('referred_user_id,reward_type,amount,status,created_at')
+          .eq('referrer_user_id', String(state.user.id)).order('created_at', { ascending: false })
+      ]);
+      if (referralsResult.error) throw referralsResult.error;
+      if (rewardsResult.error) throw rewardsResult.error;
+
+      const rewards = rewardsResult.data || [];
+      const approvedTotal = rewards.filter(reward => reward.status === 'Approved')
+        .reduce((sum, reward) => sum + Number(reward.amount || 0), 0);
+      const pendingTotal = rewards.filter(reward => reward.status === 'Pending')
+        .reduce((sum, reward) => sum + Number(reward.amount || 0), 0);
+      const formatMoney = amount => `₱${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      document.getElementById('referral-total-count').innerText = String((referralsResult.data || []).length);
+      document.getElementById('referral-total-earned').innerText = formatMoney(approvedTotal);
+      document.getElementById('referral-available-balance').innerText = formatMoney(approvedTotal);
+      document.getElementById('referral-pending-balance').innerText = formatMoney(pendingTotal);
+
+      const history = document.getElementById('referral-rewards-history');
+      history.innerHTML = rewards.length ? rewards.map(reward => {
+        const statusClass = reward.status === 'Approved'
+          ? 'bg-emerald-800 text-gold-300 border border-gold-500'
+          : reward.status === 'Rejected'
+            ? 'bg-rose-950 text-rose-300 border border-rose-500'
+            : 'bg-amber-950 text-amber-300 border border-amber-500';
+        return `
+          <tr>
+            <td class="p-2">${new Date(reward.created_at).toLocaleDateString()}</td>
+            <td class="p-2 font-mono">${escapeHtml(reward.referred_user_id)}</td>
+            <td class="p-2">${reward.reward_type === 'direct_invite' ? 'Direct invite' : 'Repeat order'}</td>
+            <td class="p-2 font-mono text-gold-300">${formatMoney(Number(reward.amount || 0))}</td>
+            <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusClass}">${escapeHtml(reward.status)}</span></td>
+          </tr>
+        `;
+      }).join('') : '<tr><td colspan="5" class="p-4 text-center text-emerald-200">No referral rewards yet.</td></tr>';
+    }
+
+    async function copyUserRefLink() {
+      const copyText = document.getElementById("user-ref-link-input");
+      try {
+        await navigator.clipboard.writeText(copyText.value);
+      } catch (error) {
+        copyText.select();
+        document.execCommand("copy");
+        copyText.setSelectionRange(0, 0);
+      }
+      showToast("Your referral link has been copied to clipboard!");
+    }
+
+    function renderAdminUsersFinancials() {
+      const tbody = document.getElementById('admin-users-financial-table');
+      if (tbody) {
+        tbody.innerHTML = state.registeredUsers.map((u) => `
+          <tr>
+            <td class="p-2.5">
+              <span class="font-bold text-white">${u.name}</span><br>
+              <span class="font-mono text-gold-300 text-[10px]">ID: ${u.id} | Email: ${u.email}</span>
+            </td>
+            <td class="p-2.5 font-mono text-gold-400 font-bold">₱${(u.balance || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+            <td class="p-2.5 font-mono text-emerald-100">₱${(u.totalEarnings || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+            <td class="p-2.5 font-mono text-[11px]">
+              Royalty: ${u.royalty || 0} PTS<br>
+              EGP: ${(u.egp || 0).toFixed(3)} | EDP: ${(u.edp || 0).toFixed(3)}
+            </td>
+            <td class="p-2.5 font-bold text-gold-300">${u.gcs || 0} GCs</td>
+            <td class="p-2.5 text-right space-x-2">
+              <button onclick="openAdminEditUserModal('${u.id}')" class="text-gold-300 hover:text-white" ${u.authUserId === state.authUser?.id ? 'disabled title="Use admin settings"' : 'title="Edit User"'}><i class="fa-solid fa-pen-to-square"></i></button>
+              <button onclick="deleteUser('${u.id}')" class="text-rose-400 hover:text-rose-300" ${u.authUserId === state.authUser?.id ? 'disabled title="Cannot delete current admin"' : 'title="Delete User"'}><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function renderUserDropdown(filter = "") {
+      const select = document.getElementById('adj-userid');
+      if (!select) return;
+      const filtered = state.registeredUsers.filter(u => 
+        u.name.toLowerCase().includes(filter.toLowerCase()) || u.id.toLowerCase().includes(filter.toLowerCase()) || u.email.toLowerCase().includes(filter.toLowerCase())
+      );
+      select.innerHTML = filtered.map(u => `
+        <option value="${u.id}">${u.id} - ${u.name} (${u.email})</option>
+      `).join('');
+    }
+
+    function filterUserDropdown() {
+      const query = document.getElementById('search-user-input').value;
+      renderUserDropdown(query);
+    }
+
+    function openAdminSettingsModal() {
+      document.getElementById('admin-setting-email').value = state.authUser?.email || '';
+      document.getElementById('admin-setting-pass').value = '';
+      document.getElementById('admin-settings-modal').classList.remove('hidden');
+    }
+    function closeAdminSettingsModal() { document.getElementById('admin-settings-modal').classList.add('hidden'); }
+    async function saveAdminSettings(e) {
+      e.preventDefault();
+      const email = document.getElementById('admin-setting-email').value.trim().toLowerCase();
+      const password = document.getElementById('admin-setting-pass').value;
+      const updates = {};
+      if (email && email !== state.authUser.email) updates.email = email;
+      if (password) updates.password = password;
+      if (Object.keys(updates).length === 0) {
+        showToast("No account changes to save.");
+        return;
+      }
+      const { data, error } = await window.supabaseClient.auth.updateUser(updates);
+      if (error) { showToast("Account update failed: " + error.message); return; }
+      state.authUser = data.user;
+      document.getElementById('admin-setting-pass').value = '';
+      closeAdminSettingsModal();
+      showToast(updates.email
+        ? "Email update requested. Confirm it using the email link; the profile email syncs after confirmation."
+        : "Password updated successfully.");
+    }
+
+    function openAdminEditUserModal(userId) {
+      const user = state.registeredUsers.find(u => u.id === userId);
+      if (!user) return;
+      document.getElementById('edit-user-id-target').value = user.id;
+      document.getElementById('edit-user-name').value = user.name;
+      document.getElementById('admin-edit-user-modal').classList.remove('hidden');
+    }
+    function closeAdminEditUserModal() { document.getElementById('admin-edit-user-modal').classList.add('hidden'); }
+    async function saveAdminEditedUser(e) {
+      e.preventDefault();
+      const targetId = document.getElementById('edit-user-id-target').value;
+      const newName = document.getElementById('edit-user-name').value.trim();
+      const { data, error } = await window.supabaseClient.from('users')
+        .update({ name: newName })
+        .eq('id', targetId)
+        .select('id, name')
+        .maybeSingle();
+      if (error) { showToast("User update failed: " + error.message); return; }
+      if (!data) { showToast("User update failed: no matching user was updated."); return; }
+      await refreshAdminData();
+      closeAdminEditUserModal();
+      showToast(`User ${targetId} updated successfully.`);
+    }
+
+    async function deleteUser(userId) {
+      if (confirm(`Are you sure you want to delete user ID ${userId}?`)) {
+        const { error } = await window.supabaseClient.rpc('delete_portal_user', { p_user_id: userId });
+        if (error) { showToast("Delete failed: " + error.message); return; }
+        await refreshAdminData();
+        showToast(`User ID ${userId} deleted successfully.`);
+      }
+    }
+
+    function renderAdminProducts() {
+      const tbody = document.getElementById('admin-products-table');
+      if (tbody) {
+        tbody.innerHTML = state.products.map(p => `
+          <tr>
+            <td class="p-2.5 flex items-center gap-2">
+              <img src="${p.image || 'https://placehold.co/300x200/064e3b/facc15?text=JRDC+Product'}" data-product-image-id="${p.id}" data-product-image-loaded="${Boolean(p.image)}" loading="lazy" class="w-8 h-8 object-cover rounded border border-gold-400 bg-white p-0.5">
+              <span class="font-bold text-white">${p.name}</span>
+            </td>
+            <td class="p-2.5">${p.category}</td>
+            <td class="p-2.5 font-mono text-gold-300">₱${p.price.toLocaleString()}</td>
+            <td class="p-2.5 font-mono">${p.stock} pcs</td>
+            <td class="p-2.5 space-x-2">
+              <button onclick="openEditProductModal(${p.id})" class="text-gold-300 hover:text-white" title="Edit Product"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button onclick="deleteProduct(${p.id})" class="text-rose-400 hover:text-rose-300" title="Delete Product"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `).join('');
+        observeProductImages();
+      }
+    }
+
+    function renderAdminQueues() {
+      const ciContainer = document.getElementById('admin-cashin-queue');
+      if (ciContainer) {
+        ciContainer.innerHTML = state.pendingCashIns.length === 0 ? `<p class="text-xs text-emerald-200">No pending cash-ins.</p>` : state.pendingCashIns.map((ci, idx) => `
+          <div class="bg-emerald-950 p-3 rounded border border-gold-500/40 space-y-2 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-white">${ci.id} - Amount ₱${ci.amount.toLocaleString()}</span>
+              <span class="text-[10px] text-gold-300 font-mono">${ci.method}</span>
+            </div>
+            <div class="text-[11px] text-emerald-200">
+              <p><strong>Name:</strong> ${ci.name} (${ci.email})</p>
+              <p><strong>User ID:</strong> <span class="font-mono text-gold-300">${ci.userId}</span> | <strong>Level:</strong> ${ci.level}</p>
+              <p><strong>Credited on approval:</strong> ₱${ci.creditedAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+              <p><strong>Ref No:</strong> ${ci.ref}</p>
+            </div>
+            <div class="flex justify-between items-center gap-2 pt-1 border-t border-emerald-900">
+              <button onclick="openCashInReceipt(${idx})" class="text-gold-300 hover:underline font-bold"><i class="fa-solid fa-eye"></i> View Receipt</button>
+              <div class="flex gap-2">
+                <button onclick="rejectCashIn(${idx})" class="bg-rose-700 text-white px-3 py-1 rounded font-bold hover:bg-rose-600">Reject</button>
+                <button onclick="approveCashIn(${idx})" class="bg-gold-500 text-emerald-950 px-3 py-1 rounded font-bold hover:bg-gold-400">Approve & Email</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const coContainer = document.getElementById('admin-cashout-queue');
+      if (coContainer) {
+        coContainer.innerHTML = state.pendingCashOuts.length === 0 ? `<p class="text-xs text-emerald-200">No pending encashments.</p>` : state.pendingCashOuts.map((co, idx) => `
+          <div class="bg-emerald-950 p-3 rounded border border-gold-500/40 space-y-2 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-white">${co.id} - Gross ₱${co.amount.toLocaleString()}</span>
+              <span class="text-[10px] text-gold-300">${co.channel}</span>
+            </div>
+            <div class="text-[11px] text-emerald-200">
+              <p><strong>Name:</strong> ${co.name} (${co.email})</p>
+              <p><strong>User ID:</strong> <span class="font-mono text-gold-300">${co.userId}</span> | <b>Level:</b> ${co.level}</p>
+              <p><strong>Net Payout:</strong> <strong class="text-gold-400">₱${co.net.toLocaleString()}</strong></p>
+              <p class="whitespace-pre-line"><strong>Details:</strong> ${escapeHtml(co.details)}</p>
+            </div>
+            <div class="flex justify-between items-center gap-2 pt-1 border-t border-emerald-900">
+              <button onclick="openCashOutProof(${idx})" class="text-gold-300 hover:underline font-bold"><i class="fa-solid fa-eye"></i> View Proof</button>
+              <div class="flex gap-2">
+                <button onclick="rejectCashOut(${idx})" class="bg-rose-700 text-white px-3 py-1 rounded font-bold hover:bg-rose-600">Reject</button>
+                <button onclick="approveCashOut(${idx})" class="bg-gold-500 text-emerald-950 px-3 py-1 rounded font-bold hover:bg-gold-400">Approve & Email</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const spinContainer = document.getElementById('admin-spin-queue');
+      if (spinContainer) {
+        spinContainer.innerHTML = state.pendingSpins.length === 0 ? `<p class="text-xs text-emerald-200">No pending spin wins.</p>` : state.pendingSpins.map((sp, idx) => `
+          <div class="bg-emerald-950 p-3 rounded border border-gold-500/40 space-y-2 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-white">${sp.id} - Prize: ${sp.prize} (${sp.type})</span>
+              <span class="text-[10px] text-gold-300">${sp.date}</span>
+            </div>
+            <div class="text-[11px] text-emerald-200">
+              <p><strong>User:</strong> ${sp.name} (${sp.email}) [ID: ${sp.userId}]</p>
+            </div>
+            <div class="flex justify-end gap-2 pt-1 border-t border-emerald-900">
+              <button onclick="rejectSpin(${idx})" class="bg-rose-700 text-white px-3 py-1 rounded font-bold hover:bg-rose-600">Reject</button>
+              <button onclick="approveSpin(${idx})" class="bg-gold-500 text-emerald-950 px-3 py-1 rounded font-bold hover:bg-gold-400">Approve Prize & 24h Settlement</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const purchaseContainer = document.getElementById('admin-purchase-queue');
+      if (purchaseContainer) {
+        purchaseContainer.innerHTML = state.pendingPurchases.length === 0
+          ? '<p class="text-xs text-emerald-200">No pending store purchases.</p>'
+          : state.pendingPurchases.map((purchase, idx) => {
+            const items = purchase.items.map(item =>
+              `${escapeHtml(item.name || `Product ${item.id}`)} x ${Number(item.qty)} @ ₱${Number(item.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+            ).join('<br>');
+            return `
+              <div class="bg-emerald-950 p-3 rounded border border-gold-500/40 space-y-2 text-xs">
+                <div class="flex justify-between items-center gap-2">
+                  <span class="font-bold text-white">Order ${escapeHtml(purchase.id)}</span>
+                  <span class="text-[10px] text-gold-300">${escapeHtml(purchase.date)}</span>
+                </div>
+                <div class="text-[11px] text-emerald-200">
+                  <p><strong>User:</strong> ${escapeHtml(purchase.name)} (${escapeHtml(purchase.email)}) [ID: ${escapeHtml(purchase.userId)}]</p>
+                  <p><strong>Items:</strong><br>${items}</p>
+                  <p><strong>Total:</strong> ₱${purchase.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} (wallet amount reserved)</p>
+                </div>
+                <div class="flex justify-end gap-2 pt-1 border-t border-emerald-900">
+                  <button onclick="rejectPortalPurchase(${idx})" class="bg-rose-700 text-white px-3 py-1 rounded font-bold hover:bg-rose-600">Reject</button>
+                  <button onclick="approvePortalPurchase(${idx})" class="bg-gold-500 text-emerald-950 px-3 py-1 rounded font-bold hover:bg-gold-400">Approve Purchase</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+      }
+
+      const redemptionContainer = document.getElementById('admin-redemption-queue');
+      if (redemptionContainer) {
+        redemptionContainer.innerHTML = state.pendingRedemptions.length === 0
+          ? '<p class="text-xs text-emerald-200">No pending incentive claims.</p>'
+          : state.pendingRedemptions.map((redemption, idx) => `
+            <div class="bg-emerald-950 p-3 rounded border border-gold-500/40 space-y-2 text-xs">
+              <div class="flex justify-between items-center gap-2">
+                <span class="font-bold text-white">${escapeHtml(redemption.title)} (${redemption.gcs} GC)</span>
+                <span class="text-[10px] text-gold-300">${escapeHtml(redemption.date)}</span>
+              </div>
+              <p class="text-[11px] text-emerald-200"><strong>User:</strong> ${escapeHtml(redemption.name)} (${escapeHtml(redemption.email)}) [ID: ${escapeHtml(redemption.userId)}]</p>
+              <div class="flex justify-end gap-2 pt-1 border-t border-emerald-900">
+                <button onclick="rejectRedemption(${idx})" class="bg-rose-700 text-white px-3 py-1 rounded font-bold hover:bg-rose-600">Reject</button>
+                <button onclick="approveRedemption(${idx})" class="bg-gold-500 text-emerald-950 px-3 py-1 rounded font-bold hover:bg-gold-400">Approve & Release</button>
+              </div>
+            </div>
+          `).join('');
+      }
+
+      const referralContainer = document.getElementById('admin-referral-queue');
+      if (referralContainer) {
+        referralContainer.innerHTML = state.pendingReferralRewards.length === 0
+          ? '<p class="text-xs text-emerald-200">No pending referral commissions.</p>'
+          : state.pendingReferralRewards.map((reward, idx) => `
+            <div class="bg-emerald-950 p-3 rounded border border-gold-500/40 space-y-2 text-xs">
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-white">₱${reward.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} direct invite commission</span>
+                <span class="text-[10px] text-gold-300">${escapeHtml(reward.date)}</span>
+              </div>
+              <div class="text-[11px] text-emerald-200">
+                <p><strong>Referrer:</strong> ${escapeHtml(reward.referrerName)} [ID: ${escapeHtml(reward.referrerUserId)}]</p>
+                <p><strong>Invited member:</strong> ${escapeHtml(reward.referredName)} [ID: ${escapeHtml(reward.referredUserId)}]</p>
+              </div>
+              <div class="flex justify-end gap-2 pt-1 border-t border-emerald-900">
+                <button onclick="rejectReferralReward(${idx})" class="bg-rose-700 text-white px-3 py-1 rounded font-bold hover:bg-rose-600">Reject</button>
+                <button onclick="approveReferralReward(${idx})" class="bg-gold-500 text-emerald-950 px-3 py-1 rounded font-bold hover:bg-gold-400">Approve Commission</button>
+              </div>
+            </div>
+          `).join('');
+      }
+    }
+
+    async function approveCashIn(idx) {
+      const item = state.pendingCashIns[idx];
+      if (!item) return;
+      const { error } = await window.supabaseClient.rpc('approve_cash_in', { p_request_id: item.id });
+      if (error) { showToast("Cash-in approval failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`Approved Cash-in ${item.id}. Email notification sent to ${item.email}.`);
+    }
+
+    async function openCashInReceipt(idx) {
+      const item = state.pendingCashIns[idx];
+      if (!item) return;
+      const { data, error } = await window.supabaseClient.from('cash_ins')
+        .select('receipt').eq('id', item.id).maybeSingle();
+      if (error) { showToast("Unable to load cash-in receipt: " + error.message); return; }
+      if (!data?.receipt) { showToast("No receipt is available for this cash-in."); return; }
+      const details = [
+        `<b>Cash-In ID:</b> ${escapeHtml(item.id)}`,
+        `<b>User:</b> ${escapeHtml(item.name)}`,
+        `<b>Amount:</b> ₱${item.amount.toLocaleString()}`,
+        `<b>Ref:</b> ${escapeHtml(item.ref)}`
+      ].join('<br>');
+      openReceiptModal(data.receipt, details);
+    }
+
+    async function rejectCashIn(idx) {
+      const item = state.pendingCashIns[idx];
+      if (!item || !confirm(`Reject cash-in ${item.id} for ${item.name}? The amount will not be credited.`)) return;
+      const { error } = await window.supabaseClient.rpc('reject_cash_in', { p_request_id: item.id });
+      if (error) { showToast("Cash-in rejection failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`Cash-in ${item.id} rejected. No funds were credited.`);
+    }
+
+    function openCashOutProof(index) {
+      const cashOut = state.pendingCashOuts[index];
+      if (!cashOut) return;
+      const details = [
+        `<b>Weekly Payout ID:</b> ${escapeHtml(cashOut.id)}`,
+        `<b>User:</b> ${escapeHtml(cashOut.name)}`,
+        `<b>Net Payout:</b> ₱${Number(cashOut.net).toLocaleString()}`,
+        `<b>Details:</b> ${escapeHtml(cashOut.details).replace(/\n/g, '<br>')}`
+      ].join('<br>');
+      openReceiptModal(cashOut.receipt, details);
+    }
+
+    async function approveCashOut(idx) {
+      const item = state.pendingCashOuts[idx];
+      if (!item) return;
+      const { error } = await window.supabaseClient.rpc('approve_cash_out', { p_request_id: item.id });
+      if (error) { showToast("Cash-out approval failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`Weekly payout ${item.id} approved! Email notification sent to ${item.email}.`);
+    }
+
+    async function rejectCashOut(idx) {
+      const item = state.pendingCashOuts[idx];
+      if (!item || !confirm(`Reject payout ${item.id} for ${item.name}? The reserved wallet amount will be returned.`)) return;
+      const { error } = await window.supabaseClient.rpc('reject_cash_out', { p_request_id: item.id });
+      if (error) { showToast("Cash-out rejection failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`Payout ${item.id} rejected. The reserved wallet amount was returned.`);
+    }
+
+    async function approveSpin(idx) {
+      const item = state.pendingSpins[idx];
+      if (!item) return;
+      const { error } = await window.supabaseClient.rpc('approve_spin', { p_spin_id: item.id });
+      if (error) { showToast("Spin approval failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`Spin prize ${item.prize} approved and 24h settled! Notification email sent to ${item.email}.`);
+    }
+
+    async function rejectSpin(idx) {
+      const item = state.pendingSpins[idx];
+      if (!item || !confirm(`Reject spin prize ${item.prize} for ${item.name}?`)) return;
+      const { error } = await window.supabaseClient.rpc('reject_spin', { p_spin_id: item.id });
+      if (error) { showToast("Spin rejection failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`Spin prize ${item.prize} rejected.`);
+    }
+
+    async function approveReferralReward(idx) {
+      const reward = state.pendingReferralRewards[idx];
+      if (!reward) return;
+      const { error } = await window.supabaseClient.rpc('approve_portal_referral_reward', {
+        p_reward_id: reward.id
+      });
+      if (error) { showToast("Referral commission approval failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`₱${reward.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} referral commission approved.`);
+    }
+
+    async function rejectReferralReward(idx) {
+      const reward = state.pendingReferralRewards[idx];
+      if (!reward || !confirm(`Reject the ₱${reward.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} referral commission for ${reward.referrerName}?`)) return;
+      const { error } = await window.supabaseClient.rpc('reject_portal_referral_reward', {
+        p_reward_id: reward.id
+      });
+      if (error) { showToast("Referral commission rejection failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`₱${reward.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} referral commission rejected.`);
+    }
+
+    async function approvePortalPurchase(idx) {
+      const purchase = state.pendingPurchases[idx];
+      if (!purchase) return;
+      const { error } = await window.supabaseClient.rpc('approve_portal_purchase', {
+        p_purchase_id: purchase.id
+      });
+      if (error) { showToast("Store purchase approval failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`Store order ${purchase.id} approved. Wallet balance, points, and inventory updated.`);
+    }
+
+    async function rejectPortalPurchase(idx) {
+      const purchase = state.pendingPurchases[idx];
+      if (!purchase || !confirm(`Reject store order ${purchase.id}? The reserved wallet amount will be returned.`)) return;
+      const { error } = await window.supabaseClient.rpc('reject_portal_purchase', {
+        p_purchase_id: purchase.id
+      });
+      if (error) { showToast("Store purchase rejection failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`Store order ${purchase.id} rejected. The reserved wallet amount was returned.`);
+    }
+
+    async function approveRedemption(idx) {
+      const redemption = state.pendingRedemptions[idx];
+      if (!redemption) return;
+      const { error } = await window.supabaseClient.rpc('release_gc_redemption', {
+        p_redemption_id: redemption.id
+      });
+      if (error) { showToast("Incentive approval failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`${redemption.title} approved for ${redemption.name}.`);
+    }
+
+    async function rejectRedemption(idx) {
+      const redemption = state.pendingRedemptions[idx];
+      if (!redemption || !confirm(`Reject ${redemption.title} for ${redemption.name}? The GCs will be returned.`)) return;
+      const { error } = await window.supabaseClient.rpc('reject_gc_redemption', {
+        p_redemption_id: redemption.id
+      });
+      if (error) { showToast("Incentive rejection failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`${redemption.title} rejected. ${redemption.gcs} GCs were returned.`);
+    }
+
+    async function adjustUserPoints(e) {
+      e.preventDefault();
+      const targetUserId = document.getElementById('adj-userid').value;
+      const field = document.getElementById('adj-field').value;
+      const action = document.getElementById('adj-action').value;
+      const val = parseFloat(document.getElementById('adj-val').value);
+      const multiplier = action === 'add' ? 1 : -1;
+      
+      const { error } = await window.supabaseClient.rpc('adjust_user_points', {
+        p_user_id: targetUserId,
+        p_field: field,
+        p_delta: val * multiplier
+      });
+      if (error) { showToast("Points adjustment failed: " + error.message); return; }
+      await refreshAdminData();
+      showToast(`Updated user ${targetUserId} ${field.toUpperCase()} by ${multiplier * val}.`);
+    }
+
+    function generateRefLink(e) {
+      e.preventDefault();
+      const type = document.getElementById('link-type').value;
+      if (!state.user.id) { showToast("The admin account needs a profile ID to generate a referral link."); return; }
+      const pageUrl = `${window.location.origin}${window.location.pathname}`;
+      const link = `${pageUrl}?ref=${encodeURIComponent(state.user.id)}&type=${encodeURIComponent(type)}`;
+      document.getElementById('gen-link-val').value = link;
+      document.getElementById('generated-link-box').classList.remove('hidden');
+
+      const qrContainer = document.getElementById('admin-qrcode-container');
+      qrContainer.innerHTML = "";
+      new QRCode(qrContainer, {
+        text: link,
+        width: 128,
+        height: 128,
+        colorDark: "#022c22",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+      showToast("Referral Link & QR Code generated successfully!");
+    }
+
+    function copyLink() {
+      const copyText = document.getElementById("gen-link-val");
+      copyText.select();
+      document.execCommand("copy");
+      showToast("Referral link copied to clipboard!");
+    }
+
+    function openAddProductModal() {
+      document.getElementById('edit-prod-id').value = '';
+      document.getElementById('prod-modal-title').innerHTML = '<i class="fa-solid fa-box-open text-gold-400"></i> Add New Product to Store';
+      document.getElementById('new-prod-name').value = '';
+      document.getElementById('new-prod-price').value = '';
+      document.getElementById('new-prod-stock').value = '';
+      document.getElementById('new-prod-desc').value = '';
+      document.getElementById('product-modal').classList.remove('hidden');
+    }
+
+    function openEditProductModal(id) {
+      const prod = state.products.find(p => p.id === id);
+      if (!prod) return;
+      document.getElementById('edit-prod-id').value = prod.id;
+      document.getElementById('prod-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-gold-400"></i> Edit Product Details';
+      document.getElementById('new-prod-name').value = prod.name;
+      document.getElementById('new-prod-cat').value = prod.category;
+      document.getElementById('new-prod-price').value = prod.price;
+      document.getElementById('new-prod-stock').value = prod.stock;
+      document.getElementById('new-prod-desc').value = prod.desc;
+      document.getElementById('product-modal').classList.remove('hidden');
+    }
+
+    function closeAddProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
+    
+    async function compressProductImage(file) {
+      const bitmap = await createImageBitmap(file);
+      const maxDimension = 1200;
+      const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const context = canvas.getContext('2d');
+      if (!context) {
+        bitmap.close();
+        throw new Error("Unable to process product image");
+      }
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      return canvas.toDataURL('image/webp', 0.82);
+    }
+
+    async function saveProduct(e) {
+      e.preventDefault();
+      const editId = document.getElementById('edit-prod-id').value;
+      const name = document.getElementById('new-prod-name').value.trim();
+      const cat = document.getElementById('new-prod-cat').value;
+      const price = parseFloat(document.getElementById('new-prod-price').value);
+      const stock = parseInt(document.getElementById('new-prod-stock').value);
+      const desc = document.getElementById('new-prod-desc').value.trim();
+      const fileInput = document.getElementById('new-prod-file');
+      let imageUrl;
+      if (fileInput.files?.[0]) {
+        try {
+          imageUrl = await compressProductImage(fileInput.files[0]);
+        } catch (error) {
+          showToast("Unable to process product image: " + error.message);
+          return;
+        }
+      }
+
+      const payload = {
+        name,
+        category: cat,
+        price,
+        stock,
+        description: desc
+      };
+      if (imageUrl) payload.image_url = imageUrl;
+      else if (!editId) payload.image_url = "https://placehold.co/300x200/064e3b/facc15?text=JRDC+Product";
+      const result = editId
+        ? await window.supabaseClient.from('portal_products').update(payload).eq('id', Number(editId))
+        : await window.supabaseClient.from('portal_products').insert(payload);
+      if (result.error) { showToast("Product save failed: " + result.error.message); return; }
+      await loadSharedRecords();
+      e.target.reset();
+      finalizeProductSave(editId ? "Product updated successfully!" : "New product added successfully!");
+    }
+
+    function finalizeProductSave(msg) {
+      renderShopProducts();
+      renderAdminProducts();
+      closeAddProductModal();
+      showToast(msg);
+    }
+
+    async function deleteProduct(id) {
+      const { error } = await window.supabaseClient.from('portal_products').delete().eq('id', id);
+      if (error) { showToast("Product delete failed: " + error.message); return; }
+      await loadSharedRecords();
+      showToast("Product deleted.");
+    }
+
+    async function redeemReward(rewardTitle, gcsNeeded) {
+      const { error } = await window.supabaseClient.rpc('redeem_gc_reward', {
+        p_title: rewardTitle,
+        p_gcs: gcsNeeded
+      });
+      if (error) { showToast("Reward redemption failed: " + error.message); return; }
+      await loadCurrentUser(state.authUser);
+      showToast(`${rewardTitle} claim submitted. It will be fulfilled after admin approval.`);
+    }
+  </script>
+</body>
+</html>
